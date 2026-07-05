@@ -15,5 +15,6 @@ public interface ComplaintService {
     List<ComplaintResponse> getComplaintsByStatus(ComplaintStatus status);
     List<ComplaintResponse> getComplaintsByCategory(String category);
     List<ComplaintResponse> getComplaintsByCitizen(String email);
+    List<ComplaintResponse> getComplaintsByAssetCode(String assetCode);
     ComplaintResponse updateStatus(Long id, ComplaintStatus status);
 }

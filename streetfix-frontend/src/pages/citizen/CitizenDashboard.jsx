@@ -9,6 +9,7 @@ import './Citizen.css';
 import SubmitComplaint from './SubmitComplaint';
 import MyComplaints from './MyComplaints';
 import ComplaintDetail from './ComplaintDetail';
+import LiveMap from '../shared/LiveMap';
 
 // ─── Citizen Dashboard Home ─────────────────────────────
 const CitizenHome = () => {
@@ -136,6 +137,7 @@ const CitizenDashboard = () => {
       <Route path="submit" element={<SubmitComplaint />} />
       <Route path="my-complaints" element={<MyComplaints />} />
       <Route path="complaints/:id" element={<ComplaintDetail />} />
+      <Route path="map" element={<LiveMap />} />
     </Routes>
   );
 };

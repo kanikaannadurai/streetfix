@@ -39,6 +39,9 @@ public class Complaint {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "asset_code")
+    private String assetCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "citizen_id", nullable = false)
     private User citizen;
@@ -54,7 +57,7 @@ public class Complaint {
     public Complaint() {}
 
     public Complaint(Long id, String title, String description, String category, Priority priority,
-                     ComplaintStatus status, Double latitude, Double longitude, String imageUrl,
+                     ComplaintStatus status, Double latitude, Double longitude, String imageUrl, String assetCode,
                      User citizen, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
@@ -65,6 +68,7 @@ public class Complaint {
         this.latitude = latitude;
         this.longitude = longitude;
         this.imageUrl = imageUrl;
+        this.assetCode = assetCode;
         this.citizen = citizen;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -97,6 +101,9 @@ public class Complaint {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
+    public String getAssetCode() { return assetCode; }
+    public void setAssetCode(String assetCode) { this.assetCode = assetCode; }
+
     public User getCitizen() { return citizen; }
     public void setCitizen(User citizen) { this.citizen = citizen; }
 
@@ -118,6 +125,7 @@ public class Complaint {
         private Double latitude;
         private Double longitude;
         private String imageUrl;
+        private String assetCode;
         private User citizen;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
@@ -131,12 +139,13 @@ public class Complaint {
         public ComplaintBuilder latitude(Double latitude) { this.latitude = latitude; return this; }
         public ComplaintBuilder longitude(Double longitude) { this.longitude = longitude; return this; }
         public ComplaintBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
+        public ComplaintBuilder assetCode(String assetCode) { this.assetCode = assetCode; return this; }
         public ComplaintBuilder citizen(User citizen) { this.citizen = citizen; return this; }
         public ComplaintBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
         public ComplaintBuilder updatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
 
         public Complaint build() {
-            return new Complaint(id, title, description, category, priority, status, latitude, longitude, imageUrl, citizen, createdAt, updatedAt);
+            return new Complaint(id, title, description, category, priority, status, latitude, longitude, imageUrl, assetCode, citizen, createdAt, updatedAt);
         }
     }
 }

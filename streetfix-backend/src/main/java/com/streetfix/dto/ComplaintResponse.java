@@ -16,6 +16,7 @@ public class ComplaintResponse {
     private Double latitude;
     private Double longitude;
     private String imageUrl;
+    private String assetCode;
     private Long citizenId;
     private String citizenName;
     private LocalDateTime createdAt;
@@ -34,6 +35,7 @@ public class ComplaintResponse {
         this.latitude = b.latitude;
         this.longitude = b.longitude;
         this.imageUrl = b.imageUrl;
+        this.assetCode = b.assetCode;
         this.citizenId = b.citizenId;
         this.citizenName = b.citizenName;
         this.createdAt = b.createdAt;
@@ -68,6 +70,9 @@ public class ComplaintResponse {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
+    public String getAssetCode() { return assetCode; }
+    public void setAssetCode(String assetCode) { this.assetCode = assetCode; }
+
     public Long getCitizenId() { return citizenId; }
     public void setCitizenId(Long citizenId) { this.citizenId = citizenId; }
 
@@ -95,6 +100,7 @@ public class ComplaintResponse {
         private Double latitude;
         private Double longitude;
         private String imageUrl;
+        private String assetCode;
         private Long citizenId;
         private String citizenName;
         private LocalDateTime createdAt;
@@ -110,6 +116,7 @@ public class ComplaintResponse {
         public ComplaintResponseBuilder latitude(Double latitude) { this.latitude = latitude; return this; }
         public ComplaintResponseBuilder longitude(Double longitude) { this.longitude = longitude; return this; }
         public ComplaintResponseBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
+        public ComplaintResponseBuilder assetCode(String assetCode) { this.assetCode = assetCode; return this; }
         public ComplaintResponseBuilder citizenId(Long citizenId) { this.citizenId = citizenId; return this; }
         public ComplaintResponseBuilder citizenName(String citizenName) { this.citizenName = citizenName; return this; }
         public ComplaintResponseBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }

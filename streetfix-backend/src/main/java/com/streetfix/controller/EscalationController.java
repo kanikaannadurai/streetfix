@@ -28,7 +28,8 @@ public class EscalationController {
      * Auto-escalation also runs via the scheduler.
      */
     @PostMapping("/complaints/{complaintId}/escalate")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') " +
+                  "or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<MessageResponse> escalateComplaint(
             @PathVariable Long complaintId,
             @RequestParam(defaultValue = "Manually escalated by supervisor") String reason) {
@@ -41,7 +42,8 @@ public class EscalationController {
      */
     @GetMapping("/complaints/{complaintId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OFFICER') or hasRole('WARD_SUPERVISOR') " +
-                  "or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+                  "or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') " +
+                  "or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<List<EscalationLogResponse>> getEscalationHistory(@PathVariable Long complaintId) {
         return ResponseEntity.ok(escalationService.getEscalationHistory(complaintId));
     }
@@ -50,8 +52,8 @@ public class EscalationController {
      * Get all escalation logs across the system (admin/supervisor view).
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') " +
-                  "or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') " +
+                  "or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<List<EscalationLogResponse>> getAllEscalations() {
         return ResponseEntity.ok(escalationService.getAllEscalations());
     }

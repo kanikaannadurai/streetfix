@@ -8,6 +8,7 @@ import api from '../../services/api';
 import '../citizen/Citizen.css';
 import AssignedComplaints from './AssignedComplaints';
 import UpdateStatus from './UpdateStatus';
+import LiveMap from '../shared/LiveMap';
 
 // ─── Officer Dashboard Home ─────────────────────────────
 const OfficerHome = () => {
@@ -130,6 +131,7 @@ const OfficerDashboard = () => {
       <Route index element={<OfficerHome />} />
       <Route path="assigned" element={<AssignedComplaints />} />
       <Route path="update/:id" element={<UpdateStatus />} />
+      <Route path="map" element={<LiveMap />} />
     </Routes>
   );
 };

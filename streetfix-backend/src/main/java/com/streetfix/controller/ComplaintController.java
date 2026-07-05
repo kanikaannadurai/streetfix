@@ -39,7 +39,9 @@ public class ComplaintController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('OFFICER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OFFICER') or hasRole('WARD_SUPERVISOR') " +
+                  "or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') " +
+                  "or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<List<ComplaintResponse>> getAllComplaints() {
         return ResponseEntity.ok(complaintService.getAllComplaints());
     }
@@ -79,7 +81,9 @@ public class ComplaintController {
     }
     
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('OFFICER') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OFFICER') or hasRole('WORKER') " +
+                  "or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') " +
+                  "or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<ComplaintResponse> updateComplaintStatus(@PathVariable Long id, @RequestParam ComplaintStatus status) {
         return ResponseEntity.ok(complaintService.updateStatus(id, status));
     }

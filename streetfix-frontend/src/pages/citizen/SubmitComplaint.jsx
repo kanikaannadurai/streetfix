@@ -1,7 +1,33 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Upload, X, SendHorizonal, Loader } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, MapPin, Upload, X, SendHorizonal, Loader, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import api from '../../services/api';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix leaflet default icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+function MapLocationPicker({ position, setPosition }) {
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng);
+    },
+  });
+  const map = useMap();
+  useEffect(() => {
+    if (position) {
+      map.setView(position, map.getZoom());
+    }
+  }, [position, map]);
+  return position ? <Marker position={position} /> : null;
+}
 
 const CATEGORIES = [
   'Road Damage', 'Pothole', 'Garbage / Waste',
@@ -18,15 +44,34 @@ const SubmitComplaint = () => {
   const [error, setError]   = useState('');
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [searchParams] = useSearchParams();
+  const assetCodeParam = searchParams.get('assetCode');
+
   const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
-    priority: 'MEDIUM',
+    priority: '',
     latitude: '',
     longitude: '',
     address: '',
+    assetCode: assetCodeParam || '',
   });
+
+  useEffect(() => {
+    if (assetCodeParam) {
+      api.get(`/assets/code/${assetCodeParam}`).then(res => {
+        if (res.data && res.data.latitude && res.data.longitude) {
+           setForm(f => ({ ...f, latitude: res.data.latitude, longitude: res.data.longitude }));
+        }
+      }).catch(err => console.error("Asset not found"));
+    }
+  }, [assetCodeParam]);
+  
+  const [isListening, setIsListening] = useState({ field: null });
+  const [duplicates, setDuplicates] = useState([]);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [isEmergency, setIsEmergency] = useState(false);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -47,23 +92,61 @@ const SubmitComplaint = () => {
     );
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setError('');
-    if (!form.title.trim() || !form.description.trim()) {
-      setError('Title and description are required.');
+  const toggleVoice = (field) => {
+    if (isListening.field === field) {
+      setIsListening({ field: null });
       return;
     }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support Voice Input. Please use Chrome or Edge.");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setIsListening({ field });
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setForm(f => ({ ...f, [field]: f[field] ? f[field] + ' ' + transcript : transcript }));
+    };
+    
+    recognition.onerror = (e) => {
+      console.error(e);
+      setIsListening({ field: null });
+    };
+    
+    recognition.onend = () => setIsListening({ field: null });
+    
+    recognition.start();
+  };
+
+  const handleSupportDuplicate = async (existingId) => {
+    try {
+      await api.post(`/complaints/${existingId}/support`);
+      alert("Successfully supported the existing issue.");
+      navigate('/citizen/my-complaints');
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to support complaint");
+    }
+  };
+
+  const executeSubmit = async () => {
     setLoading(true);
     try {
       const payload = {
         title: form.title,
         description: form.description,
         category: form.category || null,
-        priority: form.priority,
+        priority: isEmergency ? 'CRITICAL' : (form.priority || null),
         latitude:  form.latitude  ? parseFloat(form.latitude)  : null,
         longitude: form.longitude ? parseFloat(form.longitude) : null,
         address:   form.address || null,
+        assetCode: form.assetCode || null,
       };
       await api.post('/complaints', payload);
       setSuccess(true);
@@ -72,7 +155,43 @@ const SubmitComplaint = () => {
       setError(err.response?.data?.message || err.response?.data || 'Failed to submit complaint. Please try again.');
     } finally {
       setLoading(false);
+      setShowDuplicateModal(false);
     }
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setError('');
+    if (!form.title.trim() || !form.description.trim()) {
+      setError('Title and description are required.');
+      return;
+    }
+    
+    if (form.latitude && form.longitude && !showDuplicateModal) {
+      try {
+        setLoading(true);
+        const res = await api.get('/complaints/check-duplicates', {
+          params: {
+            title: form.title,
+            description: form.description,
+            category: form.category || '',
+            latitude: form.latitude,
+            longitude: form.longitude
+          }
+        });
+        
+        if (res.data && res.data.length > 0) {
+          setDuplicates(res.data);
+          setShowDuplicateModal(true);
+          setLoading(false);
+          return; // Stop submission to show modal
+        }
+      } catch (err) {
+        console.error("Duplicate check failed", err);
+      }
+    }
+    
+    await executeSubmit();
   };
 
   if (success) {
@@ -110,9 +229,41 @@ const SubmitComplaint = () => {
         <div className="glass-panel section-card">
           {error && <div className="alert alert-error"><X size={16} />{error}</div>}
 
+          {showDuplicateModal && (
+            <div className="alert alert-warning" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} />
+                <strong>Potential Duplicates Found</strong>
+              </div>
+              <p>We found similar issues reported nearby. Supporting an existing issue resolves it faster!</p>
+              {duplicates.slice(0,2).map(d => (
+                <div key={d.id} style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{d.title}</div>
+                    <div className="text-xs text-muted">{d.category} • {Math.round(d.distanceMeters)}m away</div>
+                  </div>
+                  <button type="button" className="btn-primary" style={{ padding: '6px 12px' }} onClick={() => handleSupportDuplicate(d.id)}>
+                    Support Instead
+                  </button>
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="button" className="btn-secondary" onClick={() => setShowDuplicateModal(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" style={{ borderColor: 'var(--border-color)', color: 'var(--text-dim)' }} onClick={executeSubmit}>
+                  Report Duplicate Anyway
+                </button>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Title *</label>
+              <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Title *</span>
+                <button type="button" onClick={() => toggleVoice('title')} style={{ background: 'none', border: 'none', color: isListening.field === 'title' ? 'var(--primary-color)' : 'var(--text-dim)', cursor: 'pointer' }}>
+                  {isListening.field === 'title' ? <Mic size={16} className="pulse-animation" /> : <MicOff size={16} />}
+                </button>
+              </label>
               <input
                 name="title"
                 className="input-field"
@@ -124,7 +275,12 @@ const SubmitComplaint = () => {
             </div>
 
             <div className="form-group">
-              <label>Detailed Description *</label>
+              <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Detailed Description *</span>
+                <button type="button" onClick={() => toggleVoice('description')} style={{ background: 'none', border: 'none', color: isListening.field === 'description' ? 'var(--primary-color)' : 'var(--text-dim)', cursor: 'pointer' }}>
+                  {isListening.field === 'description' ? <Mic size={16} className="pulse-animation" /> : <MicOff size={16} />}
+                </button>
+              </label>
               <textarea
                 name="description"
                 className="input-field"
@@ -138,18 +294,32 @@ const SubmitComplaint = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group">
-                <label>Category (optional — AI will detect)</label>
+                <label>Category (AI can detect)</label>
                 <select name="category" className="input-field" value={form.category} onChange={handleChange}>
-                  <option value="">🤖 Auto-Detect</option>
+                  <option value="">🤖 Auto-Detect Category</option>
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label>Priority</label>
-                <select name="priority" className="input-field" value={form.priority} onChange={handleChange}>
+                <label>Priority (AI can detect)</label>
+                <select name="priority" className="input-field" value={form.priority} onChange={handleChange} disabled={isEmergency}>
+                  <option value="">🤖 Auto-Detect Priority</option>
                   {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
+            </div>
+
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(239, 68, 68, 0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <input 
+                type="checkbox" 
+                id="emergency" 
+                checked={isEmergency} 
+                onChange={(e) => setIsEmergency(e.target.checked)} 
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <label htmlFor="emergency" style={{ margin: 0, color: 'var(--danger)', cursor: 'pointer', fontWeight: 600 }}>
+                🚨 Mark as Emergency / Critical Hazard
+              </label>
             </div>
 
             <div className="form-group">
@@ -163,30 +333,16 @@ const SubmitComplaint = () => {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group">
-                <label>Latitude</label>
-                <input
-                  name="latitude"
-                  type="number"
-                  step="any"
-                  className="input-field"
-                  placeholder="28.6139"
-                  value={form.latitude}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Longitude</label>
-                <input
-                  name="longitude"
-                  type="number"
-                  step="any"
-                  className="input-field"
-                  placeholder="77.2090"
-                  value={form.longitude}
-                  onChange={handleChange}
-                />
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label>Location on Map (Click to set pin)</label>
+              <div style={{ height: '250px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--glass-border-bright)' }}>
+                <MapContainer center={form.latitude && form.longitude ? [form.latitude, form.longitude] : [28.6139, 77.2090]} zoom={13} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <MapLocationPicker 
+                    position={form.latitude && form.longitude ? [form.latitude, form.longitude] : null} 
+                    setPosition={(pos) => setForm(f => ({ ...f, latitude: pos.lat.toFixed(6), longitude: pos.lng.toFixed(6) }))} 
+                  />
+                </MapContainer>
               </div>
             </div>
 

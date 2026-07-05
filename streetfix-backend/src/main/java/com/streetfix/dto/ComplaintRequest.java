@@ -19,6 +19,7 @@ public class ComplaintRequest {
     private Double latitude;
     private Double longitude;
     private String imageUrl;
+    private String assetCode;
 
     public ComplaintRequest() {}
 
@@ -42,4 +43,7 @@ public class ComplaintRequest {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getAssetCode() { return assetCode; }
+    public void setAssetCode(String assetCode) { this.assetCode = assetCode; }
 }

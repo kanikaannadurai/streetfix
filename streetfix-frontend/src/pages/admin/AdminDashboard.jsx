@@ -11,6 +11,10 @@ import AllComplaints from './AllComplaints';
 import AssignComplaint from './AssignComplaint';
 import Reports from './Reports';
 import SLAConfig from './SLAConfig';
+import LiveMap from '../shared/LiveMap';
+import HeatMap from '../shared/HeatMap';
+import AdminAssets from './AdminAssets';
+import AssetDetail from './AssetDetail';
 
 // ─── Admin Dashboard Home ────────────────────────────────
 const AdminHome = () => {
@@ -28,7 +32,7 @@ const AdminHome = () => {
       const [dashRes, compRes, escalRes] = await Promise.all([
         api.get('/dashboard/admin').catch(() => ({ data: null })),
         api.get('/complaints').catch(() => ({ data: [] })),
-        api.get('/escalation/logs').catch(() => ({ data: [] })),
+        api.get('/escalations').catch(() => ({ data: [] })),
       ]);
       const complaints = Array.isArray(compRes.data) ? compRes.data : [];
       setRecent(complaints.slice(0, 6));
@@ -248,6 +252,10 @@ const AdminDashboard = () => {
       <Route path="assign" element={<AssignComplaint />} />
       <Route path="reports" element={<Reports />} />
       <Route path="sla" element={<SLAConfig />} />
+      <Route path="map" element={<LiveMap />} />
+      <Route path="heatmap" element={<HeatMap />} />
+      <Route path="assets" element={<AdminAssets />} />
+      <Route path="assets/:assetCode" element={<AssetDetail />} />
     </Routes>
   );
 };

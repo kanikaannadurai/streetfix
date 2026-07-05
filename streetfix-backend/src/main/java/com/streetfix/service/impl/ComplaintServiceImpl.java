@@ -60,6 +60,7 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .imageUrl(request.getImageUrl())
+                .assetCode(request.getAssetCode())
                 .citizen(citizen)
                 .build();
 
@@ -83,6 +84,7 @@ public class ComplaintServiceImpl implements ComplaintService {
         if (request.getLatitude() != null) complaint.setLatitude(request.getLatitude());
         if (request.getLongitude() != null) complaint.setLongitude(request.getLongitude());
         if (request.getImageUrl() != null) complaint.setImageUrl(request.getImageUrl());
+        if (request.getAssetCode() != null) complaint.setAssetCode(request.getAssetCode());
 
         return mapToResponse(complaintRepository.save(complaint));
     }
@@ -120,6 +122,11 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public List<ComplaintResponse> getComplaintsByAssetCode(String assetCode) {
+        return complaintRepository.findByAssetCode(assetCode).stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
+    @Override
     public ComplaintResponse updateStatus(Long id, ComplaintStatus status) {
         Complaint complaint = complaintRepository.findById(id).orElseThrow(() -> new RuntimeException("Complaint not found"));
         complaint.setStatus(status);
@@ -137,6 +144,7 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .latitude(complaint.getLatitude())
                 .longitude(complaint.getLongitude())
                 .imageUrl(complaint.getImageUrl())
+                .assetCode(complaint.getAssetCode())
                 .citizenId(complaint.getCitizen().getId())
                 .citizenName(complaint.getCitizen().getName())
                 .createdAt(complaint.getCreatedAt())

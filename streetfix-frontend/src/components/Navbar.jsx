@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Home, User, Bell, LayoutDashboard,
-  ClipboardList, PlusCircle, BarChart3, Settings, UserCheck
+  ClipboardList, PlusCircle, BarChart3, Settings, UserCheck,
+  Map as MapIcon, Activity, Box
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -11,15 +12,20 @@ const NAV_LINKS = {
     { path: '/citizen',                label: 'Dashboard', icon: <LayoutDashboard size={15} /> },
     { path: '/citizen/submit',         label: 'Report',    icon: <PlusCircle      size={15} /> },
     { path: '/citizen/my-complaints',  label: 'My Cases',  icon: <ClipboardList   size={15} /> },
+    { path: '/citizen/map',            label: 'Live Map',  icon: <MapIcon         size={15} /> },
   ],
   OFFICER: [
     { path: '/officer',          label: 'Dashboard', icon: <LayoutDashboard size={15} /> },
     { path: '/officer/assigned', label: 'My Tasks',  icon: <ClipboardList   size={15} /> },
+    { path: '/officer/map',      label: 'Live Map',  icon: <MapIcon         size={15} /> },
   ],
   ADMIN: [
     { path: '/admin',             label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
     { path: '/admin/complaints',  label: 'Complaints', icon: <ClipboardList   size={15} /> },
     { path: '/admin/assign',      label: 'Assign',     icon: <UserCheck       size={15} /> },
+    { path: '/admin/map',         label: 'Live Map',   icon: <MapIcon         size={15} /> },
+    { path: '/admin/heatmap',     label: 'Heat Map',   icon: <Activity        size={15} /> },
+    { path: '/admin/assets',      label: 'Assets',     icon: <Box             size={15} /> },
     { path: '/admin/reports',     label: 'Reports',    icon: <BarChart3       size={15} /> },
     { path: '/admin/sla',         label: 'SLA',        icon: <Settings        size={15} /> },
   ],

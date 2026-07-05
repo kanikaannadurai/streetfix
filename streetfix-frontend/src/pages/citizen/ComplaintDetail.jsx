@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, AlertCircle, Clock, Star, CheckCircle, Camera, User, MessageSquare, Loader } from 'lucide-react';
+import { ArrowLeft, MapPin, AlertCircle, Clock, Star, CheckCircle, Camera, User, MessageSquare, Loader, ThumbsUp } from 'lucide-react';
 import api from '../../services/api';
 
 const timelineDot = status => {
@@ -21,6 +21,7 @@ const ComplaintDetail = () => {
   const [feedback, setFeedback]   = useState({ rating: 5, comments: '' });
   const [fbDone, setFbDone]       = useState(false);
   const [error, setError]         = useState('');
+  const [supporting, setSupporting] = useState(false);
 
   useEffect(() => { fetchData(); }, [id]);
 
@@ -64,6 +65,20 @@ const ComplaintDetail = () => {
     }
   };
 
+  const handleSupport = async () => {
+    setSupporting(true);
+    try {
+      await api.post(`/complaints/${id}/support`);
+      // Re-fetch to update count
+      await fetchData();
+      alert('Thank you for verifying this issue.');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to support complaint.');
+    } finally {
+      setSupporting(false);
+    }
+  };
+
   const fmt = d => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
   if (loading) return <div className="dashboard-container"><div className="loading-state"><div className="spinner" /></div></div>;
@@ -104,6 +119,21 @@ const ComplaintDetail = () => {
               </div>
             </div>
             <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--text-light)' }}>{complaint.description}</p>
+            
+            {/* Community Support */}
+            <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(59,130,246,0.05)', borderRadius: 'var(--radius)', border: '1px solid rgba(59,130,246,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ThumbsUp size={16} color="var(--primary-color)" /> Community Verification
+                </div>
+                <div className="text-sm text-muted">{complaint.supportCount || 0} Citizens have verified this issue.</div>
+              </div>
+              {!resolved && (
+                <button className="btn-secondary" onClick={handleSupport} disabled={supporting}>
+                  {supporting ? <Loader size={14} className="spin-icon" /> : <><ThumbsUp size={14} /> Support Issue</>}
+                </button>
+              )}
+            </div>
 
             {/* Meta Info */}
             <div style={{ marginTop: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', padding: '16px' }}>
