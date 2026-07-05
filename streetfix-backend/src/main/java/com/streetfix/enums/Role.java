@@ -1,0 +1,12 @@
+package com.streetfix.enums;
+
+public enum Role {
+    ROLE_CITIZEN,
+    ROLE_OFFICER,
+    ROLE_WORKER,
+    ROLE_ADMIN,
+    ROLE_WARD_SUPERVISOR,
+    ROLE_ZONAL_OFFICER,
+    ROLE_MUNICIPAL_COMMISSIONER,
+    ROLE_SUPER_ADMIN
+}
