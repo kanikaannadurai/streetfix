@@ -1,69 +1,71 @@
 package com.streetfix.service;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfWriter;
-import com.opencsv.CSVWriter;
+import com.lowagie.text.DocumentException;
 import com.streetfix.entity.Complaint;
+import com.streetfix.enums.ComplaintStatus;
+import com.streetfix.enums.Priority;
 import com.streetfix.repository.ComplaintRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
+import jakarta.persistence.criteria.Predicate;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ReportService {
 
     private final ComplaintRepository complaintRepository;
+    private final ExportService exportService;
 
-    public ReportService(ComplaintRepository complaintRepository) {
+    public ReportService(ComplaintRepository complaintRepository, ExportService exportService) {
         this.complaintRepository = complaintRepository;
+        this.exportService = exportService;
     }
 
-    public byte[] generateCsvReport() throws Exception {
-        List<Complaint> complaints = complaintRepository.findAll();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        
-        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(out))) {
-            String[] header = {"ID", "Title", "Category", "Priority", "Status", "Citizen Name", "Created At"};
-            writer.writeNext(header);
-            
-            for (Complaint c : complaints) {
-                String[] data = {
-                    c.getId().toString(),
-                    c.getTitle(),
-                    c.getCategory(),
-                    c.getPriority() != null ? c.getPriority().name() : "N/A",
-                    c.getStatus().name(),
-                    c.getCitizen() != null ? c.getCitizen().getName() : "Unknown",
-                    c.getCreatedAt() != null ? c.getCreatedAt().toString() : "N/A"
-                };
-                writer.writeNext(data);
+    public List<Complaint> searchComplaints(String startDate, String endDate, String category, String status, String priority) {
+        return complaintRepository.findAll((Specification<Complaint>) (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (StringUtils.hasText(startDate) && StringUtils.hasText(endDate)) {
+                LocalDateTime start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE).atStartOfDay();
+                LocalDateTime end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE).atTime(23, 59, 59);
+                predicates.add(cb.between(root.get("createdAt"), start, end));
             }
-        }
-        return out.toByteArray();
+
+            if (StringUtils.hasText(category)) {
+                predicates.add(cb.equal(root.get("category"), category));
+            }
+
+            if (StringUtils.hasText(status)) {
+                predicates.add(cb.equal(root.get("status"), ComplaintStatus.valueOf(status.toUpperCase())));
+            }
+
+            if (StringUtils.hasText(priority)) {
+                predicates.add(cb.equal(root.get("priority"), Priority.valueOf(priority.toUpperCase())));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
     }
 
-    public byte[] generatePdfReport() throws Exception {
-        List<Complaint> complaints = complaintRepository.findAll();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        
-        Document document = new Document();
-        PdfWriter.getInstance(document, out);
-        document.open();
-        
-        document.add(new Paragraph("StreetFix Municipal Complaint Report"));
-        document.add(new Paragraph("Total Complaints: " + complaints.size()));
-        document.add(new Paragraph("--------------------------------------------------"));
-        
-        for (Complaint c : complaints) {
-            String text = String.format("ID: %d | %s | [%s] %s - Status: %s", 
-                    c.getId(), c.getPriority(), c.getCategory(), c.getTitle(), c.getStatus());
-            document.add(new Paragraph(text));
-        }
-        
-        document.close();
-        return out.toByteArray();
+    public byte[] exportComplaintsPdf(String startDate, String endDate, String category, String status, String priority) throws DocumentException {
+        List<Complaint> complaints = searchComplaints(startDate, endDate, category, status, priority);
+        return exportService.generatePdfReport(complaints, "Complaint Report");
+    }
+
+    public byte[] exportComplaintsCsv(String startDate, String endDate, String category, String status, String priority) throws IOException {
+        List<Complaint> complaints = searchComplaints(startDate, endDate, category, status, priority);
+        return exportService.generateCsvReport(complaints);
+    }
+
+    public byte[] exportComplaintsExcel(String startDate, String endDate, String category, String status, String priority) throws IOException {
+        List<Complaint> complaints = searchComplaints(startDate, endDate, category, status, priority);
+        return exportService.generateExcelReport(complaints);
     }
 }

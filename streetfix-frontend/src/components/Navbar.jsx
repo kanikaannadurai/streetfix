@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Home, User, Bell, LayoutDashboard,
   ClipboardList, PlusCircle, BarChart3, Settings, UserCheck,
-  Map as MapIcon, Activity, Box
+  Map as MapIcon, Activity, Box, Shield, Trophy, Building, FileText
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -26,8 +26,10 @@ const NAV_LINKS = {
     { path: '/admin/map',         label: 'Live Map',   icon: <MapIcon         size={15} /> },
     { path: '/admin/heatmap',     label: 'Heat Map',   icon: <Activity        size={15} /> },
     { path: '/admin/assets',      label: 'Assets',     icon: <Box             size={15} /> },
-    { path: '/admin/reports',     label: 'Reports',    icon: <BarChart3       size={15} /> },
+    { path: '/admin/reports-center', label: 'Reports', icon: <FileText        size={15} /> },
     { path: '/admin/sla',         label: 'SLA',        icon: <Settings        size={15} /> },
+    { path: '/admin/performance/officer', label: 'Performance', icon: <Shield size={15} /> },
+    { path: '/admin/leaderboards', label: 'Leaderboards', icon: <Trophy size={15} /> },
   ],
   WARD_SUPERVISOR: [
     { path: '/ward-supervisor',       label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
@@ -38,7 +40,7 @@ const NAV_LINKS = {
     { path: '/commissioner',          label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
     { path: '/admin/complaints',      label: 'Complaints', icon: <ClipboardList   size={15} /> },
     { path: '/admin/map',             label: 'Live Map',   icon: <MapIcon         size={15} /> },
-    { path: '/admin/reports',         label: 'Reports',    icon: <BarChart3       size={15} /> },
+    { path: '/admin/reports-center',  label: 'Reports',    icon: <FileText        size={15} /> },
   ],
   SUPER_ADMIN: [
     { path: '/super-admin',           label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
@@ -46,7 +48,10 @@ const NAV_LINKS = {
     { path: '/admin/map',             label: 'Live Map',   icon: <MapIcon         size={15} /> },
     { path: '/admin/heatmap',         label: 'Heat Map',   icon: <Activity        size={15} /> },
     { path: '/admin/assets',          label: 'Assets',     icon: <Box             size={15} /> },
-    { path: '/admin/reports',         label: 'Reports',    icon: <BarChart3       size={15} /> },
+    { path: '/admin/reports-center',  label: 'Reports',    icon: <FileText        size={15} /> },
+    { path: '/admin/performance/officer', label: 'Officers', icon: <Shield size={15} /> },
+    { path: '/admin/performance/ward-dept', label: 'Wards', icon: <Building size={15} /> },
+    { path: '/admin/leaderboards',    label: 'Leaderboards', icon: <Trophy size={15} /> },
     { path: '/admin/sla',             label: 'SLA Config', icon: <Settings        size={15} /> },
   ],
 };

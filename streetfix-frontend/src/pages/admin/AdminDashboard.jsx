@@ -15,6 +15,10 @@ import LiveMap from '../shared/LiveMap';
 import HeatMap from '../shared/HeatMap';
 import AdminAssets from './AdminAssets';
 import AssetDetail from './AssetDetail';
+import OfficerPerformance from '../performance/OfficerPerformance';
+import WardDepartmentPerformance from '../performance/WardDepartmentPerformance';
+import Leaderboards from '../performance/Leaderboards';
+import ReportCenter from '../reports/ReportCenter';
 
 // ─── Admin Dashboard Home ────────────────────────────────
 const AdminHome = () => {
@@ -256,6 +260,10 @@ const AdminDashboard = () => {
       <Route path="heatmap" element={<HeatMap />} />
       <Route path="assets" element={<AdminAssets />} />
       <Route path="assets/:assetCode" element={<AssetDetail />} />
+      <Route path="performance/officer" element={<OfficerPerformance />} />
+      <Route path="performance/ward-dept" element={<WardDepartmentPerformance />} />
+      <Route path="leaderboards" element={<Leaderboards />} />
+      <Route path="reports-center" element={<ReportCenter />} />
     </Routes>
   );
 };

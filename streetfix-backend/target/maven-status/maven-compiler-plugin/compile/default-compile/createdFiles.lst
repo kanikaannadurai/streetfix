@@ -22,6 +22,7 @@ com\streetfix\dto\JwtResponse.class
 com\streetfix\entity\ComplaintTimeline$ComplaintTimelineBuilder.class
 com\streetfix\entity\Feedback$FeedbackBuilder.class
 com\streetfix\entity\EscalationConfig$EscalationConfigBuilder.class
+com\streetfix\controller\PerformanceController.class
 com\streetfix\repository\ComplaintTimelineRepository.class
 com\streetfix\service\impl\AssignmentServiceImpl.class
 com\streetfix\dto\EscalationLogResponse$Builder.class
@@ -37,6 +38,7 @@ com\streetfix\service\SmsNotificationService.class
 com\streetfix\dto\RegisterRequest.class
 com\streetfix\security\UserDetailsServiceImpl.class
 com\streetfix\controller\ComplaintTimelineController.class
+com\streetfix\service\PerformanceService.class
 com\streetfix\dto\SlaConfigResponse$SlaConfigResponseBuilder.class
 com\streetfix\entity\ComplaintSupport$ComplaintSupportBuilder.class
 com\streetfix\entity\User.class
@@ -97,6 +99,7 @@ com\streetfix\dto\MessageResponse.class
 com\streetfix\controller\AuthController.class
 com\streetfix\entity\ComplaintSla$ComplaintSlaBuilder.class
 com\streetfix\repository\AssignmentRepository.class
+com\streetfix\service\ExportService.class
 com\streetfix\service\HeatmapService.class
 com\streetfix\entity\Feedback.class
 com\streetfix\service\EscalationService.class

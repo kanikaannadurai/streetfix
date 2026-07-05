@@ -26,7 +26,7 @@ const HeatMap = () => {
   if (loading) return <div className="dashboard-container"><div className="loading-state"><div className="spinner" /></div></div>;
 
   return (
-    <div className="dashboard-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', padding: '24px' }}>
+    <div className="dashboard-container">
       <div className="page-header glass-panel" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'space-between', width: '100%' }}>
           <div className="page-header-left">
@@ -38,8 +38,8 @@ const HeatMap = () => {
         </div>
       </div>
 
-      <div className="glass-panel section-card" style={{ flex: 1, padding: 0, overflow: 'hidden', display: 'flex' }}>
-        <MapContainer center={[28.6139, 77.2090]} zoom={12} style={{ height: '100%', width: '100%' }}>
+      <div className="glass-panel section-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <MapContainer center={[28.6139, 77.2090]} zoom={12} style={{ height: '600px', width: '100%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
