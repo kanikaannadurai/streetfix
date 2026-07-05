@@ -129,16 +129,18 @@ public class EscalationServiceImpl implements EscalationService {
             case LEVEL_0 -> EscalationLevel.LEVEL_1;
             case LEVEL_1 -> EscalationLevel.LEVEL_2;
             case LEVEL_2 -> EscalationLevel.LEVEL_3;
-            case LEVEL_3 -> null; // already at top
+            case LEVEL_3 -> EscalationLevel.LEVEL_4;
+            case LEVEL_4 -> null; // already at top
         };
     }
 
     private String levelToRole(EscalationLevel level) {
         return switch (level) {
             case LEVEL_0 -> "ROLE_OFFICER";
-            case LEVEL_1 -> "ROLE_OFFICER";          // reminder to officer
-            case LEVEL_2 -> "ROLE_WARD_SUPERVISOR";
+            case LEVEL_1 -> "ROLE_WARD_SUPERVISOR";
+            case LEVEL_2 -> "ROLE_ASSISTANT_COMMISSIONER";
             case LEVEL_3 -> "ROLE_MUNICIPAL_COMMISSIONER";
+            case LEVEL_4 -> "ROLE_SUPER_ADMIN";
         };
     }
 
@@ -148,6 +150,7 @@ public class EscalationServiceImpl implements EscalationService {
             case 1 -> EscalationLevel.LEVEL_1;
             case 2 -> EscalationLevel.LEVEL_2;
             case 3 -> EscalationLevel.LEVEL_3;
+            case 4 -> EscalationLevel.LEVEL_4;
             default -> null;
         };
     }

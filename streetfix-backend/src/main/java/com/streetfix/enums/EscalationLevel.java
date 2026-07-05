@@ -1,8 +1,9 @@
 package com.streetfix.enums;
 
 public enum EscalationLevel {
-    LEVEL_0,   // No escalation – assigned officer handling
-    LEVEL_1,   // 3 days – Officer Reminder
-    LEVEL_2,   // 7 days – Escalated to Ward Supervisor
-    LEVEL_3    // 15 days – Escalated to Municipal Commissioner + Critical Alert
+    LEVEL_0,   // Assigned officer handling
+    LEVEL_1,   // Escalated to Ward Supervisor
+    LEVEL_2,   // Escalated to Assistant Commissioner
+    LEVEL_3,   // Escalated to Municipal Commissioner
+    LEVEL_4    // Escalated to Super Admin
 }

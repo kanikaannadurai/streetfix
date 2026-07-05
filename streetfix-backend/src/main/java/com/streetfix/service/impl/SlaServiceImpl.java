@@ -8,9 +8,11 @@ import com.streetfix.entity.ComplaintSla;
 import com.streetfix.entity.SlaConfig;
 import com.streetfix.enums.EscalationLevel;
 import com.streetfix.enums.SlaStatus;
+import com.streetfix.repository.AssignmentRepository;
 import com.streetfix.repository.ComplaintRepository;
 import com.streetfix.repository.ComplaintSlaRepository;
 import com.streetfix.repository.SlaConfigRepository;
+import com.streetfix.service.DisciplinaryService;
 import com.streetfix.service.SlaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +33,19 @@ public class SlaServiceImpl implements SlaService {
     private final SlaConfigRepository slaConfigRepository;
     private final ComplaintSlaRepository complaintSlaRepository;
     private final ComplaintRepository complaintRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final DisciplinaryService disciplinaryService;
 
     public SlaServiceImpl(SlaConfigRepository slaConfigRepository,
                           ComplaintSlaRepository complaintSlaRepository,
-                          ComplaintRepository complaintRepository) {
+                          ComplaintRepository complaintRepository,
+                          AssignmentRepository assignmentRepository,
+                          DisciplinaryService disciplinaryService) {
         this.slaConfigRepository = slaConfigRepository;
         this.complaintSlaRepository = complaintSlaRepository;
         this.complaintRepository = complaintRepository;
+        this.assignmentRepository = assignmentRepository;
+        this.disciplinaryService = disciplinaryService;
     }
 
     // ─────────────────────────── SLA CONFIG CRUD ───────────────────────────
@@ -141,6 +149,12 @@ public class SlaServiceImpl implements SlaService {
         for (ComplaintSla sla : breached) {
             sla.setStatus(SlaStatus.BREACHED);
             complaintSlaRepository.save(sla);
+
+            // Apply disciplinary action to the assigned officer
+            assignmentRepository.findByComplaintId(sla.getComplaint().getId()).stream()
+                .filter(assignment -> assignment.getOfficer() != null)
+                .findFirst()
+                .ifPresent(assignment -> disciplinaryService.applySlaViolationDiscipline(sla.getComplaint(), assignment.getOfficer()));
         }
 
         // 2. Mark warning SLAs (within 24-hour window, configurable per category)
