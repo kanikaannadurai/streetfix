@@ -19,13 +19,13 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getAdminDashboard() {
         return ResponseEntity.ok(dashboardService.getAdminDashboard());
     }
 
     @GetMapping("/officer")
-    @PreAuthorize("hasRole('OFFICER')")
+    @PreAuthorize("hasRole('OFFICER') or hasRole('WORKER')")
     public ResponseEntity<Map<String, Object>> getOfficerDashboard(Principal principal) {
         return ResponseEntity.ok(dashboardService.getOfficerDashboard(principal.getName()));
     }
@@ -34,5 +34,17 @@ public class DashboardController {
     @PreAuthorize("hasRole('CITIZEN')")
     public ResponseEntity<Map<String, Object>> getCitizenDashboard(Principal principal) {
         return ResponseEntity.ok(dashboardService.getCitizenDashboard(principal.getName()));
+    }
+
+    @GetMapping("/ward-supervisor")
+    @PreAuthorize("hasRole('WARD_SUPERVISOR')")
+    public ResponseEntity<Map<String, Object>> getWardSupervisorDashboard() {
+        return ResponseEntity.ok(dashboardService.getAdminDashboard());
+    }
+
+    @GetMapping("/commissioner")
+    @PreAuthorize("hasRole('ASSISTANT_COMMISSIONER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('ZONAL_OFFICER')")
+    public ResponseEntity<Map<String, Object>> getCommissionerDashboard() {
+        return ResponseEntity.ok(dashboardService.getAdminDashboard());
     }
 }

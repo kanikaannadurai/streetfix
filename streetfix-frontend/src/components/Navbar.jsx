@@ -29,10 +29,27 @@ const NAV_LINKS = {
     { path: '/admin/reports',     label: 'Reports',    icon: <BarChart3       size={15} /> },
     { path: '/admin/sla',         label: 'SLA',        icon: <Settings        size={15} /> },
   ],
+  WARD_SUPERVISOR: [
+    { path: '/ward-supervisor',       label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
+    { path: '/admin/complaints',      label: 'Complaints', icon: <ClipboardList   size={15} /> },
+    { path: '/admin/map',             label: 'Live Map',   icon: <MapIcon         size={15} /> },
+  ],
+  COMMISSIONER: [
+    { path: '/commissioner',          label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
+    { path: '/admin/complaints',      label: 'Complaints', icon: <ClipboardList   size={15} /> },
+    { path: '/admin/map',             label: 'Live Map',   icon: <MapIcon         size={15} /> },
+    { path: '/admin/reports',         label: 'Reports',    icon: <BarChart3       size={15} /> },
+  ],
+  SUPER_ADMIN: [
+    { path: '/super-admin',           label: 'Dashboard',  icon: <LayoutDashboard size={15} /> },
+    { path: '/admin/complaints',      label: 'Complaints', icon: <ClipboardList   size={15} /> },
+    { path: '/admin/map',             label: 'Live Map',   icon: <MapIcon         size={15} /> },
+    { path: '/admin/heatmap',         label: 'Heat Map',   icon: <Activity        size={15} /> },
+    { path: '/admin/assets',          label: 'Assets',     icon: <Box             size={15} /> },
+    { path: '/admin/reports',         label: 'Reports',    icon: <BarChart3       size={15} /> },
+    { path: '/admin/sla',             label: 'SLA Config', icon: <Settings        size={15} /> },
+  ],
 };
-
-const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER'];
-const OFFICER_ROLES = ['OFFICER', 'WARD_SUPERVISOR', 'ZONAL_OFFICER'];
 
 const Navbar = () => {
   const navigate   = useNavigate();
@@ -47,14 +64,27 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const navRole = ADMIN_ROLES.includes(role) ? 'ADMIN' : OFFICER_ROLES.includes(role) ? 'OFFICER' : 'CITIZEN';
-  const links   = NAV_LINKS[navRole] || [];
+  let navRole = 'CITIZEN';
+  if (role === 'SUPER_ADMIN') navRole = 'SUPER_ADMIN';
+  else if (['ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER', 'MUNICIPAL_COMMISSIONER'].includes(role)) navRole = 'COMMISSIONER';
+  else if (role === 'ADMIN') navRole = 'ADMIN';
+  else if (role === 'WARD_SUPERVISOR') navRole = 'WARD_SUPERVISOR';
+  else if (['OFFICER', 'WORKER'].includes(role)) navRole = 'OFFICER';
+
+  const links = NAV_LINKS[navRole] || [];
+
+  const getBrandPath = () => {
+    if (navRole === 'SUPER_ADMIN') return '/super-admin';
+    if (navRole === 'COMMISSIONER') return '/commissioner';
+    if (navRole === 'WARD_SUPERVISOR') return '/ward-supervisor';
+    return `/${navRole.toLowerCase()}`;
+  };
 
   if (!token) return null;
 
   return (
     <nav className="navbar glass-panel">
-      <div className="navbar-brand" onClick={() => navigate(`/${navRole.toLowerCase()}`)}>
+      <div className="navbar-brand" onClick={() => navigate(getBrandPath())}>
         <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
           🛣️
         </div>
@@ -66,7 +96,7 @@ const Navbar = () => {
         {links.map(link => (
           <button
             key={link.path}
-            className={`nav-link-btn ${location.pathname === link.path || (link.path !== `/${navRole.toLowerCase()}` && location.pathname.startsWith(link.path)) ? 'active' : ''}`}
+            className={`nav-link-btn ${location.pathname === link.path || (link.path !== getBrandPath() && location.pathname.startsWith(link.path)) ? 'active' : ''}`}
             onClick={() => navigate(link.path)}
           >
             {link.icon}

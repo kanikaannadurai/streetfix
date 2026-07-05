@@ -7,6 +7,9 @@ import ResetPassword from './pages/ResetPassword';
 import CitizenDashboard from './pages/citizen/CitizenDashboard';
 import OfficerDashboard from './pages/officer/OfficerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import WardSupervisorDashboard from './pages/supervisor/WardSupervisorDashboard';
+import CommissionerDashboard from './pages/commissioner/CommissionerDashboard';
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import Navbar from './components/Navbar';
 import './App.css';
 
@@ -49,6 +52,27 @@ function App() {
           <Route path="/admin/*" element={
             <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Ward Supervisor */}
+          <Route path="/ward-supervisor/*" element={
+            <ProtectedRoute allowedRoles={['WARD_SUPERVISOR']}>
+              <WardSupervisorDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Commissioner (Asst. Commissioner, Zonal Officer, Municipal Commissioner) */}
+          <Route path="/commissioner/*" element={
+            <ProtectedRoute allowedRoles={['ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER', 'MUNICIPAL_COMMISSIONER']}>
+              <CommissionerDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Super Admin */}
+          <Route path="/super-admin/*" element={
+            <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+              <SuperAdminDashboard />
             </ProtectedRoute>
           } />
 
