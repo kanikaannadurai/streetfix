@@ -1,31 +1,33 @@
 package com.streetfix.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class EmailNotificationService {
 
     public EmailNotificationService() {
-        System.out.println("[EMAIL] Mail service disabled - no SMTP configured");
+        log.info("[EMAIL] Mail service disabled - no SMTP configured");
     }
 
     public void sendEmail(String to, String subject, String body) {
-        System.out.println("[EMAIL DISABLED] To: " + to + " | Subject: " + subject);
+        log.info("[EMAIL DISABLED] To: {} | Subject: {} | Body: {}", to, subject, body);
     }
 
     public void sendComplaintCreatedEmail(String to, String complaintId) {
-        System.out.println("[EMAIL DISABLED] Complaint created: " + complaintId);
+        log.info("[EMAIL DISABLED] Complaint created: {}", complaintId);
     }
 
     public void sendStatusUpdateEmail(String to, String complaintId, String status) {
-        System.out.println("[EMAIL DISABLED] Status update: " + complaintId + " -> " + status);
+        log.info("[EMAIL DISABLED] Status update: {} -> {}", complaintId, status);
     }
 
     public void sendEscalationEmail(String to, String complaintId, String level) {
-        System.out.println("[EMAIL DISABLED] Escalation: " + complaintId + " level: " + level);
+        log.info("[EMAIL DISABLED] Escalation: {} level: {}", complaintId, level);
     }
 
     public void sendReminderEmail(String to, String complaintId) {
-        System.out.println("[EMAIL DISABLED] Reminder: " + complaintId);
+        log.info("[EMAIL DISABLED] Reminder: {}", complaintId);
     }
 }

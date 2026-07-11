@@ -18,13 +18,25 @@ const CommissionerHome = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const rawRole = localStorage.getItem('role') || '';
+  const role = rawRole.replace('ROLE_', '').toUpperCase();
+
+  const getDashboardTitle = () => {
+    switch (role) {
+      case 'MUNICIPAL_COMMISSIONER': return 'Municipal Commissioner Dashboard';
+      case 'ZONAL_OFFICER': return 'Zonal Officer Dashboard';
+      case 'ASSISTANT_COMMISSIONER': return 'Assistant Commissioner Dashboard';
+      default: return 'Commissioner Dashboard';
+    }
+  };
+
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const [dashRes, compRes, catRes, priRes, slaRes, userRes, escalRes, trendRes] = await Promise.all([
-        api.get('/dashboard/admin').catch(() => ({ data: null })),
+        api.get('/dashboard/commissioner').catch(() => ({ data: null })),
         api.get('/complaints').catch(() => ({ data: [] })),
         api.get('/analytics/category').catch(() => ({ data: null })),
         api.get('/analytics/priority').catch(() => ({ data: null })),
@@ -62,13 +74,12 @@ const CommissionerHome = () => {
     <div className="dashboard-container">
       <div className="page-header glass-panel">
         <div className="page-header-left">
-          <h2 className="gradient-text">Commissioner Dashboard</h2>
+          <h2 className="gradient-text">{getDashboardTitle()}</h2>
           <p>City-wide performance overview, critical monitoring, and decision support.</p>
         </div>
         <div className="page-header-actions">
           <button className="btn-icon" onClick={fetchData}><RotateCcw size={16} /></button>
           <button className="btn-secondary" onClick={() => navigate('/admin/reports')}><BarChart3 size={16} /> Reports</button>
-          <button className="btn-primary" onClick={() => navigate('/admin/map')}><Activity size={16} /> Live Map</button>
         </div>
       </div>
 

@@ -18,6 +18,7 @@ public class ComplaintRequest {
 
     private Double latitude;
     private Double longitude;
+    private String address;
     private String imageUrl;
     private String assetCode;
 
@@ -40,6 +41,9 @@ public class ComplaintRequest {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

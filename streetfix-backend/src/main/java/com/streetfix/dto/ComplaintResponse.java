@@ -15,6 +15,7 @@ public class ComplaintResponse {
     private ComplaintStatus status;
     private Double latitude;
     private Double longitude;
+    private String address;
     private String imageUrl;
     private String assetCode;
     private Long citizenId;
@@ -22,6 +23,10 @@ public class ComplaintResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long supportCount;
+    private String beforeImageUrl;
+    private String afterImageUrl;
+    private String citizenRemarks;
+    private Boolean citizenApproved;
 
     public ComplaintResponse() {}
 
@@ -34,6 +39,7 @@ public class ComplaintResponse {
         this.status = b.status;
         this.latitude = b.latitude;
         this.longitude = b.longitude;
+        this.address = b.address;
         this.imageUrl = b.imageUrl;
         this.assetCode = b.assetCode;
         this.citizenId = b.citizenId;
@@ -41,6 +47,10 @@ public class ComplaintResponse {
         this.createdAt = b.createdAt;
         this.updatedAt = b.updatedAt;
         this.supportCount = b.supportCount;
+        this.beforeImageUrl = b.beforeImageUrl;
+        this.afterImageUrl = b.afterImageUrl;
+        this.citizenRemarks = b.citizenRemarks;
+        this.citizenApproved = b.citizenApproved;
     }
 
     public Long getId() { return id; }
@@ -67,6 +77,9 @@ public class ComplaintResponse {
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
 
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
@@ -88,6 +101,18 @@ public class ComplaintResponse {
     public Long getSupportCount() { return supportCount; }
     public void setSupportCount(Long supportCount) { this.supportCount = supportCount; }
 
+    public String getBeforeImageUrl() { return beforeImageUrl; }
+    public void setBeforeImageUrl(String beforeImageUrl) { this.beforeImageUrl = beforeImageUrl; }
+
+    public String getAfterImageUrl() { return afterImageUrl; }
+    public void setAfterImageUrl(String afterImageUrl) { this.afterImageUrl = afterImageUrl; }
+
+    public String getCitizenRemarks() { return citizenRemarks; }
+    public void setCitizenRemarks(String citizenRemarks) { this.citizenRemarks = citizenRemarks; }
+
+    public Boolean getCitizenApproved() { return citizenApproved; }
+    public void setCitizenApproved(Boolean citizenApproved) { this.citizenApproved = citizenApproved; }
+
     public static ComplaintResponseBuilder builder() { return new ComplaintResponseBuilder(); }
 
     public static class ComplaintResponseBuilder {
@@ -99,6 +124,7 @@ public class ComplaintResponse {
         private ComplaintStatus status;
         private Double latitude;
         private Double longitude;
+        private String address;
         private String imageUrl;
         private String assetCode;
         private Long citizenId;
@@ -106,6 +132,10 @@ public class ComplaintResponse {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private Long supportCount;
+        private String beforeImageUrl;
+        private String afterImageUrl;
+        private String citizenRemarks;
+        private Boolean citizenApproved;
 
         public ComplaintResponseBuilder id(Long id) { this.id = id; return this; }
         public ComplaintResponseBuilder title(String title) { this.title = title; return this; }
@@ -115,6 +145,7 @@ public class ComplaintResponse {
         public ComplaintResponseBuilder status(ComplaintStatus status) { this.status = status; return this; }
         public ComplaintResponseBuilder latitude(Double latitude) { this.latitude = latitude; return this; }
         public ComplaintResponseBuilder longitude(Double longitude) { this.longitude = longitude; return this; }
+        public ComplaintResponseBuilder address(String address) { this.address = address; return this; }
         public ComplaintResponseBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
         public ComplaintResponseBuilder assetCode(String assetCode) { this.assetCode = assetCode; return this; }
         public ComplaintResponseBuilder citizenId(Long citizenId) { this.citizenId = citizenId; return this; }
@@ -122,6 +153,10 @@ public class ComplaintResponse {
         public ComplaintResponseBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
         public ComplaintResponseBuilder updatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
         public ComplaintResponseBuilder supportCount(Long supportCount) { this.supportCount = supportCount; return this; }
+        public ComplaintResponseBuilder beforeImageUrl(String beforeImageUrl) { this.beforeImageUrl = beforeImageUrl; return this; }
+        public ComplaintResponseBuilder afterImageUrl(String afterImageUrl) { this.afterImageUrl = afterImageUrl; return this; }
+        public ComplaintResponseBuilder citizenRemarks(String citizenRemarks) { this.citizenRemarks = citizenRemarks; return this; }
+        public ComplaintResponseBuilder citizenApproved(Boolean citizenApproved) { this.citizenApproved = citizenApproved; return this; }
 
         public ComplaintResponse build() { return new ComplaintResponse(this); }
     }

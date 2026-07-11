@@ -11,6 +11,11 @@ import WardSupervisorDashboard from './pages/supervisor/WardSupervisorDashboard'
 import CommissionerDashboard from './pages/commissioner/CommissionerDashboard';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import Navbar from './components/Navbar';
+import Profile from './pages/shared/Profile';
+import Settings from './pages/shared/Settings';
+import NotFound from './pages/shared/NotFound';
+import Unauthorized from './pages/shared/Unauthorized';
+import GenericError from './pages/shared/GenericError';
 import './App.css';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -18,7 +23,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const role  = (localStorage.getItem('role') || '').replace('ROLE_', '').toUpperCase();
 
   if (!token) return <Navigate to="/login" replace />;
-  if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/unauthorized" replace />;
   return children;
 };
 
@@ -43,14 +48,14 @@ function App() {
 
           {/* Officer — nested routes handled inside OfficerDashboard */}
           <Route path="/officer/*" element={
-            <ProtectedRoute allowedRoles={['OFFICER', 'WARD_SUPERVISOR', 'ZONAL_OFFICER']}>
+            <ProtectedRoute allowedRoles={['OFFICER', 'WORKER']}>
               <OfficerDashboard />
             </ProtectedRoute>
           } />
 
           {/* Admin — nested routes handled inside AdminDashboard */}
           <Route path="/admin/*" element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER']}>
+            <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER', 'WARD_SUPERVISOR', 'ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER']}>
               <AdminDashboard />
             </ProtectedRoute>
           } />
@@ -76,8 +81,24 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* Shared Routes */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+
+          {/* Error Routes */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/error" element={<GenericError />} />
+
           {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </BrowserRouter>

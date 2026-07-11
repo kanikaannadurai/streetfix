@@ -44,10 +44,9 @@ const UpdateStatus = () => {
     setError('');
     setSuccess('');
     try {
-      // Try PATCH /status endpoint first, fallback to PUT
-      await api.patch(`/complaints/${id}/status?status=${newStatus}`).catch(() =>
-        api.put(`/complaints/${id}`, { ...complaint, status: newStatus, remarks: remark })
-      );
+      // Backend uses PUT for /status endpoint
+      await api.put(`/complaints/${id}/status?status=${newStatus}`);
+      window.dispatchEvent(new Event('refreshNotifications'));
       setSuccess(`Status updated to ${newStatus.replace('_', ' ')} successfully.`);
       setComplaint(c => ({ ...c, status: newStatus }));
     } catch (err) {

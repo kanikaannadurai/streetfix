@@ -16,13 +16,23 @@ const WardSupervisorHome = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const rawRole = localStorage.getItem('role') || '';
+  const role = rawRole.replace('ROLE_', '').toUpperCase();
+
+  const getDashboardTitle = () => {
+    switch (role) {
+      case 'WARD_SUPERVISOR': return 'Ward Supervisor Dashboard';
+      default: return 'Supervisor Dashboard';
+    }
+  };
+
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const [dashRes, compRes, catRes, slaRes, trendRes] = await Promise.all([
-        api.get('/dashboard/admin').catch(() => ({ data: null })),
+        api.get('/dashboard/ward-supervisor').catch(() => ({ data: null })),
         api.get('/complaints').catch(() => ({ data: [] })),
         api.get('/analytics/category').catch(() => ({ data: null })),
         api.get('/analytics/sla').catch(() => ({ data: null })),
@@ -51,12 +61,11 @@ const WardSupervisorHome = () => {
     <div className="dashboard-container">
       <div className="page-header glass-panel">
         <div className="page-header-left">
-          <h2 className="gradient-text">Ward Supervisor Dashboard</h2>
+          <h2 className="gradient-text">{getDashboardTitle()}</h2>
           <p>Ward-level monitoring, SLA compliance, and officer performance overview.</p>
         </div>
         <div className="page-header-actions">
           <button className="btn-icon" onClick={fetchData}><RotateCcw size={16} /></button>
-          <button className="btn-primary" onClick={() => navigate('/ward-supervisor/map')}><Map size={16} /> Live Map</button>
         </div>
       </div>
 

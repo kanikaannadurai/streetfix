@@ -22,43 +22,43 @@ public class AnalyticsController {
     private final UserRepository userRepository;
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<AnalyticsDashboardResponse> getDashboardStats() {
         return ResponseEntity.ok(analyticsService.getDashboardStats());
     }
 
     @GetMapping("/category")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getCategoryAnalytics() {
         return ResponseEntity.ok(analyticsService.getCategoryAnalytics());
     }
 
     @GetMapping("/priority")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getPriorityAnalytics() {
         return ResponseEntity.ok(analyticsService.getPriorityAnalytics());
     }
 
     @GetMapping("/status")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getStatusAnalytics() {
         return ResponseEntity.ok(analyticsService.getStatusAnalytics());
     }
 
     @GetMapping("/trend")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getTrendAnalytics(@RequestParam(defaultValue = "30") int days) {
         return ResponseEntity.ok(analyticsService.getTrendAnalytics(days));
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getUserAnalytics() {
         return ResponseEntity.ok(analyticsService.getUserAnalytics());
     }
 
     @GetMapping("/sla")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WARD_SUPERVISOR') or hasRole('ASSISTANT_COMMISSIONER') or hasRole('ZONAL_OFFICER') or hasRole('MUNICIPAL_COMMISSIONER') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<Map<String, Object>> getSlaAnalytics() {
         return ResponseEntity.ok(analyticsService.getSlaAnalytics());
     }

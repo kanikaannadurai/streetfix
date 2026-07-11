@@ -51,6 +51,7 @@ const AssignComplaint = () => {
     setSuccess('');
     try {
       await api.post('/assignments', { complaintId: selected.id, officerId: parseInt(officerId) });
+      window.dispatchEvent(new Event('refreshNotifications'));
       setSuccess(`Complaint #${selected.id} successfully assigned!`);
       setSelected(null);
       setOfficerId('');

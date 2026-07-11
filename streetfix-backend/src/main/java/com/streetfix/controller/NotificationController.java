@@ -25,87 +25,34 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
     private final UserRepository userRepository;
 
-    /**
-     * Get all notifications for the currently logged-in user.
-     */
+    private Long getLoggedInUserId(Principal principal) {
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
+    }
+
     @GetMapping
-    public ResponseEntity<List<NotificationResponse>> getMyNotifications(Principal principal) {
-        Long userId = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"))
-                .getId();
-
-        List<NotificationResponse> notifications = notificationRepository.findByUserId(userId)
-                .stream()
-                .map(n -> NotificationResponse.builder()
-                        .id(n.getId())
-                        .message(n.getMessage())
-                        .status(n.getStatus())
-                        .createdAt(n.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(notifications);
+    public ResponseEntity<List<Notification>> getMyNotifications(Principal principal) {
+        return ResponseEntity.ok(notificationService.getUserNotifications(getLoggedInUserId(principal)));
     }
 
-    /**
-     * Get count of unread notifications.
-     */
-    @GetMapping("/unread/count")
+    @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(Principal principal) {
-        Long userId = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"))
-                .getId();
-
-        long count = notificationRepository.findByUserId(userId)
-                .stream()
-                .filter(n -> "UNREAD".equals(n.getStatus()))
-                .count();
-
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(notificationService.getUnreadCount(getLoggedInUserId(principal)));
     }
 
-    /**
-     * Mark a specific notification as READ.
-     */
     @PutMapping("/{id}/read")
     public ResponseEntity<MessageResponse> markAsRead(@PathVariable Long id, Principal principal) {
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
-
-        // Ensure the notification belongs to the requesting user
-        Long userId = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"))
-                .getId();
-
-        if (!notification.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Access denied: notification does not belong to you");
-        }
-
-        notification.setStatus("READ");
-        notificationRepository.save(notification);
+        notificationService.markAsRead(id, getLoggedInUserId(principal));
         return ResponseEntity.ok(new MessageResponse("Notification marked as read"));
     }
 
-    /**
-     * Mark ALL notifications as read for the current user.
-     */
     @PutMapping("/read-all")
     public ResponseEntity<MessageResponse> markAllAsRead(Principal principal) {
-        Long userId = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"))
-                .getId();
-
-        List<Notification> unread = notificationRepository.findByUserId(userId)
-                .stream()
-                .filter(n -> "UNREAD".equals(n.getStatus()))
-                .collect(Collectors.toList());
-
-        unread.forEach(n -> n.setStatus("READ"));
-        notificationRepository.saveAll(unread);
-
+        notificationService.markAllAsRead(getLoggedInUserId(principal));
         return ResponseEntity.ok(new MessageResponse("All notifications marked as read"));
     }
 }

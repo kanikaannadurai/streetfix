@@ -12,6 +12,8 @@ import com.streetfix.repository.ComplaintRepository;
 import com.streetfix.repository.OfficerRepository;
 import com.streetfix.repository.WorkerRepository;
 import com.streetfix.service.AssignmentService;
+import com.streetfix.service.NotificationService;
+import com.streetfix.enums.Role;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,15 +25,18 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final ComplaintRepository complaintRepository;
     private final OfficerRepository officerRepository;
     private final WorkerRepository workerRepository;
+    private final NotificationService notificationService;
 
     public AssignmentServiceImpl(AssignmentRepository assignmentRepository,
                                  ComplaintRepository complaintRepository,
                                  OfficerRepository officerRepository,
-                                 WorkerRepository workerRepository) {
+                                 WorkerRepository workerRepository,
+                                 NotificationService notificationService) {
         this.assignmentRepository = assignmentRepository;
         this.complaintRepository = complaintRepository;
         this.officerRepository = officerRepository;
         this.workerRepository = workerRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -60,6 +65,13 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         assignmentRepository.save(assignment);
         complaintRepository.save(complaint);
+
+        if (worker != null) {
+            String title = "New Complaint Assigned";
+            String message = String.format("A new complaint has been assigned to you. Please start the work.\nComplaint ID: %d\nTitle: %s\nLocation: %s\nPriority: %s",
+                    complaint.getId(), complaint.getTitle(), complaint.getAddress(), complaint.getPriority());
+            notificationService.createNotificationForUser(worker.getUser().getId(), Role.ROLE_WORKER.name(), complaint.getId(), title, message);
+        }
 
         return new MessageResponse("Assignment created successfully");
     }

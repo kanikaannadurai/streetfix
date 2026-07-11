@@ -8,10 +8,7 @@ import api from '../../services/api';
 import './Citizen.css';
 import SubmitComplaint from './SubmitComplaint';
 import MyComplaints from './MyComplaints';
-import ComplaintDetail from './ComplaintDetail';
-import LiveMap from '../shared/LiveMap';
-
-// ─── Citizen Dashboard Home ─────────────────────────────
+import ComplaintDetail from './ComplaintDetail';// ─── Citizen Dashboard Home ─────────────────────────────
 const CitizenHome = () => {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
@@ -137,7 +134,6 @@ const CitizenDashboard = () => {
       <Route path="submit" element={<SubmitComplaint />} />
       <Route path="my-complaints" element={<MyComplaints />} />
       <Route path="complaints/:id" element={<ComplaintDetail />} />
-      <Route path="map" element={<LiveMap />} />
     </Routes>
   );
 };

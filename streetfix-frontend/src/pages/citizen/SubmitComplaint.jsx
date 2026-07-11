@@ -3,31 +3,40 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, Upload, X, SendHorizonal, Loader, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import api from '../../services/api';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-// Fix leaflet default icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+const customIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
-function MapLocationPicker({ position, setPosition }) {
+const LocationMarker = ({ position, setPosition, fetchAddress }) => {
+  const map = useMap();
+  const lat = position ? position[0] : null;
+  const lng = position ? position[1] : null;
+  
+  useEffect(() => {
+    if (lat !== null && lng !== null) {
+      map.flyTo([lat, lng], map.getZoom(), { animate: true });
+    }
+  }, [lat, lng, map]);
+
   useMapEvents({
     click(e) {
-      setPosition(e.latlng);
+      setPosition([e.latlng.lat, e.latlng.lng]);
+      fetchAddress(e.latlng.lat, e.latlng.lng);
     },
   });
-  const map = useMap();
-  useEffect(() => {
-    if (position) {
-      map.setView(position, map.getZoom());
-    }
-  }, [position, map]);
-  return position ? <Marker position={position} /> : null;
-}
+
+  return position && position[0] ? <Marker position={position} icon={customIcon} /> : null;
+};
+
 
 const CATEGORIES = [
   'Road Damage', 'Pothole', 'Garbage / Waste',
@@ -42,10 +51,12 @@ const SubmitComplaint = () => {
   const fileRef = useRef();
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(null);
   const [searchParams] = useSearchParams();
   const assetCodeParam = searchParams.get('assetCode');
+  const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]); // default to Delhi
 
   const [form, setForm] = useState({
     title: '',
@@ -55,6 +66,7 @@ const SubmitComplaint = () => {
     latitude: '',
     longitude: '',
     address: '',
+    displayAddress: '',
     assetCode: assetCodeParam || '',
   });
 
@@ -73,7 +85,12 @@ const SubmitComplaint = () => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [isEmergency, setIsEmergency] = useState(false);
 
-  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = e => {
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors(fe => ({ ...fe, [e.target.name]: null }));
+    }
+  };
 
   const handleFileChange = e => {
     const file = e.target.files[0];
@@ -84,11 +101,59 @@ const SubmitComplaint = () => {
     }
   };
 
+  const fetchAddress = async (lat, lon) => {
+    const latFixed = lat.toFixed(6);
+    const lonFixed = lon.toFixed(6);
+    setForm(f => ({ ...f, latitude: latFixed, longitude: lonFixed, displayAddress: 'Fetching address...' }));
+    
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latFixed}&lon=${lonFixed}`);
+      const data = await res.json();
+      if (data && data.address) {
+        const a = data.address;
+        const area = a.suburb || a.neighbourhood || a.village || a.residential || a.road || '';
+        const city = a.city || a.town || a.county || '';
+        const district = a.state_district || '';
+        const state = a.state || '';
+        const country = a.country || '';
+        const pincode = a.postcode || '';
+        
+        const parts = [];
+        if (area) parts.push(area);
+        if (city) parts.push(city);
+        if (district && district !== city) parts.push(district);
+        if (state) parts.push(state);
+        if (country) {
+           parts.push(pincode ? `${country} - ${pincode}` : country);
+        }
+        
+        const displayAddr = parts.join(',\n');
+        const fullAddress = data.display_name;
+        
+        setForm(f => ({ ...f, address: fullAddress, displayAddress: displayAddr, latitude: latFixed, longitude: lonFixed }));
+      } else {
+         setForm(f => ({ ...f, displayAddress: 'Unable to fetch address', latitude: latFixed, longitude: lonFixed }));
+      }
+    } catch (e) {
+      console.error('Geocoding failed', e);
+      setForm(f => ({ ...f, displayAddress: 'Unable to fetch address', latitude: latFixed, longitude: lonFixed }));
+    }
+  };
+
   const locateMe = () => {
     if (!navigator.geolocation) return alert('Geolocation not supported');
     navigator.geolocation.getCurrentPosition(
-      pos => setForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) })),
-      () => alert('Could not get location')
+      pos => {
+        setMapCenter([pos.coords.latitude, pos.coords.longitude]);
+        fetchAddress(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        if (err.code === 1) {
+          alert("Unable to access your location. Please select a location manually on the map.");
+        } else {
+          alert('Could not get location');
+        }
+      }
     );
   };
 
@@ -149,6 +214,7 @@ const SubmitComplaint = () => {
         assetCode: form.assetCode || null,
       };
       await api.post('/complaints', payload);
+      window.dispatchEvent(new Event('refreshNotifications'));
       setSuccess(true);
       setTimeout(() => navigate('/citizen/my-complaints'), 2000);
     } catch (err) {
@@ -162,8 +228,14 @@ const SubmitComplaint = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
-    if (!form.title.trim() || !form.description.trim()) {
-      setError('Title and description are required.');
+    let errors = {};
+    if (!form.title.trim()) errors.title = 'Title is required';
+    if (!form.description.trim()) errors.description = 'Description is required';
+    if (!form.latitude || !form.longitude) errors.location = 'Please set a location on the map';
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please fill in all required fields properly.');
       return;
     }
     
@@ -266,12 +338,13 @@ const SubmitComplaint = () => {
               </label>
               <input
                 name="title"
-                className="input-field"
+                className={`input-field ${fieldErrors.title ? 'invalid' : ''}`}
+                style={fieldErrors.title ? { borderColor: 'var(--danger)' } : {}}
                 placeholder="Brief description of the issue"
                 value={form.title}
                 onChange={handleChange}
-                required
               />
+              {fieldErrors.title && <div className="text-xs" style={{ color: 'var(--danger)', marginTop: '4px' }}>{fieldErrors.title}</div>}
             </div>
 
             <div className="form-group">
@@ -283,13 +356,14 @@ const SubmitComplaint = () => {
               </label>
               <textarea
                 name="description"
-                className="input-field"
+                className={`input-field ${fieldErrors.description ? 'invalid' : ''}`}
+                style={fieldErrors.description ? { borderColor: 'var(--danger)' } : {}}
                 rows={5}
                 placeholder="Describe the issue in detail — when did it start, severity, impact..."
                 value={form.description}
                 onChange={handleChange}
-                required
               />
+              {fieldErrors.description && <div className="text-xs" style={{ color: 'var(--danger)', marginTop: '4px' }}>{fieldErrors.description}</div>}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -333,22 +407,54 @@ const SubmitComplaint = () => {
               />
             </div>
 
-            <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Location on Map (Click to set pin)</label>
-              <div style={{ height: '250px', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--glass-border-bright)' }}>
-                <MapContainer center={form.latitude && form.longitude ? [form.latitude, form.longitude] : [28.6139, 77.2090]} zoom={13} style={{ height: '100%', width: '100%' }}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <MapLocationPicker 
-                    position={form.latitude && form.longitude ? [form.latitude, form.longitude] : null} 
-                    setPosition={(pos) => setForm(f => ({ ...f, latitude: pos.lat.toFixed(6), longitude: pos.lng.toFixed(6) }))} 
-                  />
-                </MapContainer>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="form-group">
+                <label>Latitude *</label>
+                <input name="latitude" className="input-field" value={form.latitude} onChange={handleChange} placeholder="e.g. 28.6139" style={fieldErrors.location ? { borderColor: 'var(--danger)' } : {}} />
               </div>
+              <div className="form-group">
+                <label>Longitude *</label>
+                <input name="longitude" className="input-field" value={form.longitude} onChange={handleChange} placeholder="e.g. 77.2090" style={fieldErrors.location ? { borderColor: 'var(--danger)' } : {}} />
+              </div>
+            </div>
+            {fieldErrors.location && <div className="text-xs" style={{ color: 'var(--danger)', marginTop: '4px' }}>{fieldErrors.location}</div>}
+
+            <div style={{ height: '300px', width: '100%', marginBottom: '16px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+              <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%', zIndex: 1 }}>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <LocationMarker 
+                  position={form.latitude && form.longitude ? [parseFloat(form.latitude), parseFloat(form.longitude)] : null} 
+                  setPosition={(pos) => setMapCenter(pos)} 
+                  fetchAddress={fetchAddress} 
+                />
+              </MapContainer>
             </div>
 
             <button type="button" className="btn-secondary w-full" style={{ marginBottom: '16px' }} onClick={locateMe}>
               <MapPin size={16} /> Use My Current Location
             </button>
+
+            {form.displayAddress && (
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ fontWeight: 600, color: 'var(--primary-color)', marginBottom: '8px' }}>Current Location</div>
+                {form.displayAddress === 'Unable to fetch address' ? (
+                  <div className="text-muted">Unable to fetch address</div>
+                ) : form.displayAddress === 'Fetching address...' ? (
+                  <div className="text-muted">Fetching address...</div>
+                ) : (
+                  <div className="text-sm" style={{ whiteSpace: 'pre-line', marginBottom: '12px', lineHeight: '1.5' }}>
+                    {form.displayAddress}
+                  </div>
+                )}
+                <div className="text-xs text-muted" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                  <div>Latitude: {form.latitude}</div>
+                  <div>Longitude: {form.longitude}</div>
+                </div>
+              </div>
+            )}
 
             <button type="submit" className="btn-primary w-full" disabled={loading}>
               {loading ? <><Loader size={16} className="spin-icon" /> Submitting...</> : <><SendHorizonal size={16} /> Submit Complaint</>}

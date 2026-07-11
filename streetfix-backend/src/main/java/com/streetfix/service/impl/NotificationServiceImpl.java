@@ -26,23 +26,60 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendNotification(Long userId, String message) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            Notification notification = Notification.builder()
-                    .user(user)
-                    .message(message)
-                    .status("UNREAD")
-                    .build();
-            notificationRepository.save(notification);
+    public void createNotificationForUser(Long receiverId, String receiverRole, Long complaintId, String title, String message) {
+        Notification notification = Notification.builder()
+                .receiverId(receiverId)
+                .receiverRole(receiverRole)
+                .complaintId(complaintId)
+                .title(title)
+                .message(message)
+                .isRead(false)
+                .build();
+        notificationRepository.save(notification);
 
-            // Phase 5: Trigger Email and SMS integrations
+        // Optional: Trigger email/SMS if needed (not explicitly requested to remove, so keep it for receiver)
+        User user = userRepository.findById(receiverId).orElse(null);
+        if (user != null) {
             if (user.getEmail() != null) {
-                emailNotificationService.sendEmail(user.getEmail(), "StreetFix Notification", message);
+                emailNotificationService.sendEmail(user.getEmail(), title, message);
             }
             if (user.getPhone() != null) {
                 smsNotificationService.sendSms(user.getPhone(), message);
             }
         }
+    }
+
+    @Override
+    public void createNotificationForRole(com.streetfix.enums.Role role, Long complaintId, String title, String message) {
+        List<User> users = userRepository.findByRole(role);
+        for (User user : users) {
+            createNotificationForUser(user.getId(), role.name(), complaintId, title, message);
+        }
+    }
+
+    @Override
+    public List<Notification> getUserNotifications(Long userId) {
+        return notificationRepository.findByReceiverIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
+    public long getUnreadCount(Long userId) {
+        return notificationRepository.countByReceiverIdAndIsReadFalse(userId);
+    }
+
+    @Override
+    public void markAsRead(Long notificationId, Long userId) {
+        Notification notification = notificationRepository.findById(notificationId).orElse(null);
+        if (notification != null && notification.getReceiverId().equals(userId)) {
+            notification.setIsRead(true);
+            notificationRepository.save(notification);
+        }
+    }
+
+    @Override
+    public void markAllAsRead(Long userId) {
+        List<Notification> unread = notificationRepository.findByReceiverIdAndIsReadFalse(userId);
+        unread.forEach(n -> n.setIsRead(true));
+        notificationRepository.saveAll(unread);
     }
 }

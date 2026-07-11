@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Filter, UserCheck, AlertTriangle, MapPin, Clock, ChevronRight, RotateCcw, Eye } from 'lucide-react';
 import api from '../../services/api';
+import SkeletonLoader from '../../components/SkeletonLoader';
 import '../citizen/Citizen.css';
 
 const STATUSES = ['', 'PENDING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'ESCALATED'];
@@ -25,7 +26,8 @@ const AllComplaints = () => {
     setLoading(true);
     try {
       const res = await api.get('/complaints');
-      setComplaints(Array.isArray(res.data) ? res.data : []);
+      const content = res.data.content ? res.data.content : (Array.isArray(res.data) ? res.data : []);
+      setComplaints(content);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -106,7 +108,9 @@ const AllComplaints = () => {
       {/* Table */}
       <div className="glass-panel section-card">
         {loading ? (
-          <div className="loading-state"><div className="spinner" /></div>
+          <div className="loading-state" style={{ padding: '20px' }}>
+            <SkeletonLoader count={5} type="card" />
+          </div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <Filter size={48} />

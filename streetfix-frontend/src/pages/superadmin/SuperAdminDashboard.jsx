@@ -24,6 +24,17 @@ const SuperAdminHome = () => {
   const [newRole, setNewRole] = useState('');
   const navigate = useNavigate();
 
+  const rawRole = localStorage.getItem('role') || '';
+  const role = rawRole.replace('ROLE_', '').toUpperCase();
+
+  const getDashboardTitle = () => {
+    switch (role) {
+      case 'SUPER_ADMIN': return 'Super Admin Dashboard';
+      case 'ADMIN': return 'Admin Dashboard';
+      default: return 'Super Admin Dashboard';
+    }
+  };
+
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
@@ -76,7 +87,7 @@ const SuperAdminHome = () => {
       <div className="page-header glass-panel">
         <div className="page-header-left">
           <h2 className="gradient-text" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={24} /> Super Admin Control Center
+            <Shield size={24} /> {getDashboardTitle()}
           </h2>
           <p>Complete system monitoring, user management, and platform analytics.</p>
         </div>

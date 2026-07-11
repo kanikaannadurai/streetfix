@@ -28,10 +28,18 @@ const Login = () => {
 
       if (cleanRole === 'CITIZEN') {
         navigate('/citizen', { replace: true });
-      } else if (['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER'].includes(cleanRole)) {
+      } else if (cleanRole === 'SUPER_ADMIN') {
+        navigate('/super-admin', { replace: true });
+      } else if (cleanRole === 'ADMIN') {
         navigate('/admin', { replace: true });
-      } else {
+      } else if (['ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER', 'MUNICIPAL_COMMISSIONER'].includes(cleanRole)) {
+        navigate('/commissioner', { replace: true });
+      } else if (cleanRole === 'WARD_SUPERVISOR') {
+        navigate('/ward-supervisor', { replace: true });
+      } else if (['OFFICER', 'WORKER'].includes(cleanRole)) {
         navigate('/officer', { replace: true });
+      } else {
+        navigate('/', { replace: true });
       }
     } catch (err) {
       console.error('Login error:', err.response || err);

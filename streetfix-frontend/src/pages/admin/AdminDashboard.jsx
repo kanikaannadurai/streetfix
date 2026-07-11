@@ -11,8 +11,6 @@ import AllComplaints from './AllComplaints';
 import AssignComplaint from './AssignComplaint';
 import Reports from './Reports';
 import SLAConfig from './SLAConfig';
-import LiveMap from '../shared/LiveMap';
-import HeatMap from '../shared/HeatMap';
 import AdminAssets from './AdminAssets';
 import AssetDetail from './AssetDetail';
 import OfficerPerformance from '../performance/OfficerPerformance';
@@ -27,6 +25,17 @@ const AdminHome = () => {
   const [escalated, setEscalated] = useState([]);
   const [loading, setLoading]  = useState(true);
   const navigate = useNavigate();
+
+  const rawRole = localStorage.getItem('role') || '';
+  const role = rawRole.replace('ROLE_', '').toUpperCase();
+
+  const getDashboardTitle = () => {
+    switch (role) {
+      case 'ADMIN': return 'Admin Dashboard';
+      case 'SUPER_ADMIN': return 'Super Admin Dashboard';
+      default: return 'Admin Dashboard';
+    }
+  };
 
   useEffect(() => { fetchData(); }, []);
 
@@ -62,7 +71,7 @@ const AdminHome = () => {
       {/* Header */}
       <div className="page-header glass-panel">
         <div className="page-header-left">
-          <h2 className="gradient-text">Admin Command Center</h2>
+          <h2 className="gradient-text">{getDashboardTitle()}</h2>
           <p>System-wide overview of civic issue management.</p>
         </div>
         <div className="page-header-actions">
@@ -256,8 +265,6 @@ const AdminDashboard = () => {
       <Route path="assign" element={<AssignComplaint />} />
       <Route path="reports" element={<Reports />} />
       <Route path="sla" element={<SLAConfig />} />
-      <Route path="map" element={<LiveMap />} />
-      <Route path="heatmap" element={<HeatMap />} />
       <Route path="assets" element={<AdminAssets />} />
       <Route path="assets/:assetCode" element={<AssetDetail />} />
       <Route path="performance/officer" element={<OfficerPerformance />} />

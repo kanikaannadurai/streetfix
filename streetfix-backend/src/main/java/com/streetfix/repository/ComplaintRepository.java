@@ -8,13 +8,20 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ComplaintRepository extends JpaRepository<Complaint, Long>, JpaSpecificationExecutor<Complaint> {
+    Page<Complaint> findByStatus(ComplaintStatus status, Pageable pageable);
     List<Complaint> findByStatus(ComplaintStatus status);
+    
+    Page<Complaint> findByCategory(String category, Pageable pageable);
     List<Complaint> findByCategory(String category);
+    
+    Page<Complaint> findByCitizenId(Long citizenId, Pageable pageable);
     List<Complaint> findByCitizenId(Long citizenId);
     List<Complaint> findByAssetCode(String assetCode);
     List<Complaint> findByPriority(Priority priority);
