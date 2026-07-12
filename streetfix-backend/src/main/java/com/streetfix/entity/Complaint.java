@@ -26,7 +26,7 @@ public class Complaint {
     private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private Priority priority;
 
     @Enumerated(EnumType.STRING)
@@ -61,6 +61,14 @@ public class Complaint {
     @JoinColumn(name = "citizen_id", nullable = false)
     private User citizen;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_supervisor_id")
+    private User wardSupervisor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "worker_id")
+    private User worker;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -74,7 +82,7 @@ public class Complaint {
     public Complaint(Long id, String title, String description, String category, Priority priority,
                      ComplaintStatus status, Double latitude, Double longitude, String address, String imageUrl, String assetCode,
                      String beforeImageUrl, String afterImageUrl, String citizenRemarks, Boolean citizenApproved,
-                     User citizen, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                     User citizen, User wardSupervisor, User worker, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -91,6 +99,8 @@ public class Complaint {
         this.citizenRemarks = citizenRemarks;
         this.citizenApproved = citizenApproved;
         this.citizen = citizen;
+        this.wardSupervisor = wardSupervisor;
+        this.worker = worker;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -143,6 +153,12 @@ public class Complaint {
     public User getCitizen() { return citizen; }
     public void setCitizen(User citizen) { this.citizen = citizen; }
 
+    public User getWardSupervisor() { return wardSupervisor; }
+    public void setWardSupervisor(User wardSupervisor) { this.wardSupervisor = wardSupervisor; }
+
+    public User getWorker() { return worker; }
+    public void setWorker(User worker) { this.worker = worker; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -168,6 +184,8 @@ public class Complaint {
         private String citizenRemarks;
         private Boolean citizenApproved;
         private User citizen;
+        private User wardSupervisor;
+        private User worker;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 
@@ -187,11 +205,13 @@ public class Complaint {
         public ComplaintBuilder citizenRemarks(String citizenRemarks) { this.citizenRemarks = citizenRemarks; return this; }
         public ComplaintBuilder citizenApproved(Boolean citizenApproved) { this.citizenApproved = citizenApproved; return this; }
         public ComplaintBuilder citizen(User citizen) { this.citizen = citizen; return this; }
+        public ComplaintBuilder wardSupervisor(User wardSupervisor) { this.wardSupervisor = wardSupervisor; return this; }
+        public ComplaintBuilder worker(User worker) { this.worker = worker; return this; }
         public ComplaintBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
         public ComplaintBuilder updatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
 
         public Complaint build() {
-            return new Complaint(id, title, description, category, priority, status, latitude, longitude, address, imageUrl, assetCode, beforeImageUrl, afterImageUrl, citizenRemarks, citizenApproved, citizen, createdAt, updatedAt);
+            return new Complaint(id, title, description, category, priority, status, latitude, longitude, address, imageUrl, assetCode, beforeImageUrl, afterImageUrl, citizenRemarks, citizenApproved, citizen, wardSupervisor, worker, createdAt, updatedAt);
         }
     }
 }

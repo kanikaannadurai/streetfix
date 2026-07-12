@@ -36,4 +36,12 @@ public class AuthController {
     public ResponseEntity<MessageResponse> logoutUser() {
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<com.streetfix.entity.User> getCurrentUser(java.security.Principal principal) {
+        String email = principal.getName();
+        return authService.getCurrentUser(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

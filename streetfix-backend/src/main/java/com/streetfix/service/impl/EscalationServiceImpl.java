@@ -128,9 +128,9 @@ public class EscalationServiceImpl implements EscalationService {
         return switch (current) {
             case LEVEL_0 -> EscalationLevel.LEVEL_1;
             case LEVEL_1 -> EscalationLevel.LEVEL_2;
-            case LEVEL_2 -> EscalationLevel.LEVEL_3;
-            case LEVEL_3 -> EscalationLevel.LEVEL_4;
-            case LEVEL_4 -> null; // already at top
+            case LEVEL_2 -> null; // already at top
+            case LEVEL_3 -> null;
+            case LEVEL_4 -> null;
         };
     }
 
@@ -138,9 +138,9 @@ public class EscalationServiceImpl implements EscalationService {
         return switch (level) {
             case LEVEL_0 -> "ROLE_OFFICER";
             case LEVEL_1 -> "ROLE_WARD_SUPERVISOR";
-            case LEVEL_2 -> "ROLE_ASSISTANT_COMMISSIONER";
-            case LEVEL_3 -> "ROLE_MUNICIPAL_COMMISSIONER";
-            case LEVEL_4 -> "ROLE_SUPER_ADMIN";
+            case LEVEL_2 -> "ROLE_ADMIN";
+            case LEVEL_3 -> "ROLE_ADMIN"; // fallback
+            case LEVEL_4 -> "ROLE_ADMIN"; // fallback
         };
     }
 

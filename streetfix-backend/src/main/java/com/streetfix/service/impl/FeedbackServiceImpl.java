@@ -28,7 +28,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         Complaint complaint = complaintRepository.findById(request.getComplaintId())
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
-        if (complaint.getStatus() != ComplaintStatus.RESOLVED && complaint.getStatus() != ComplaintStatus.CLOSED) {
+        if (complaint.getStatus() != ComplaintStatus.RESOLVED) {
             throw new RuntimeException("Feedback can only be submitted for resolved complaints");
         }
 
@@ -44,7 +44,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         feedbackRepository.save(feedback);
 
-        complaint.setStatus(ComplaintStatus.CLOSED);
+        complaint.setStatus(ComplaintStatus.RESOLVED);
         complaintRepository.save(complaint);
 
         return new MessageResponse("Feedback submitted successfully");

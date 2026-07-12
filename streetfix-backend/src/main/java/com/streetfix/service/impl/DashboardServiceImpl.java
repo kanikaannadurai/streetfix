@@ -10,15 +10,24 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.streetfix.entity.Officer;
+import com.streetfix.repository.OfficerRepository;
+import com.streetfix.entity.Assignment;
+import com.streetfix.repository.AssignmentRepository;
+
 @Service
 public class DashboardServiceImpl implements DashboardService {
 
     private final ComplaintRepository complaintRepository;
     private final UserRepository userRepository;
+    private final OfficerRepository officerRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    public DashboardServiceImpl(ComplaintRepository complaintRepository, UserRepository userRepository) {
+    public DashboardServiceImpl(ComplaintRepository complaintRepository, UserRepository userRepository, OfficerRepository officerRepository, AssignmentRepository assignmentRepository) {
         this.complaintRepository = complaintRepository;
         this.userRepository = userRepository;
+        this.officerRepository = officerRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @Override
@@ -33,9 +42,19 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public Map<String, Object> getOfficerDashboard(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        Officer officer = officerRepository.findByUserId(user.getId()).orElse(null);
         Map<String, Object> stats = new HashMap<>();
-        stats.put("assignedComplaints", complaintRepository.findByStatus(ComplaintStatus.ASSIGNED).size());
-        stats.put("inProgressComplaints", complaintRepository.findByStatus(ComplaintStatus.IN_PROGRESS).size());
+        if (officer != null) {
+            java.util.List<Assignment> assignments = assignmentRepository.findByOfficerId(officer.getId());
+            long assigned = assignments.stream().filter(a -> a.getComplaint().getStatus() != ComplaintStatus.RESOLVED && a.getComplaint().getStatus() != ComplaintStatus.WORK_COMPLETED).count();
+            long inProgress = assignments.stream().filter(a -> a.getComplaint().getStatus() == ComplaintStatus.WORK_COMPLETED).count();
+            stats.put("assignedComplaints", assigned);
+            stats.put("inProgressComplaints", inProgress);
+        } else {
+            stats.put("assignedComplaints", 0);
+            stats.put("inProgressComplaints", 0);
+        }
         return stats;
     }
 
@@ -43,7 +62,17 @@ public class DashboardServiceImpl implements DashboardService {
     public Map<String, Object> getCitizenDashboard(String email) {
         User citizen = userRepository.findByEmail(email).orElseThrow();
         Map<String, Object> stats = new HashMap<>();
-        stats.put("myComplaints", complaintRepository.findByCitizenId(citizen.getId()).size());
+        
+        java.util.List<com.streetfix.entity.Complaint> complaints = complaintRepository.findByCitizenId(citizen.getId());
+        long total = complaints.size();
+        long resolved = complaints.stream().filter(c -> c.getStatus() == ComplaintStatus.RESOLVED || c.getStatus() == ComplaintStatus.WORK_COMPLETED).count();
+        long pending = complaints.stream().filter(c -> c.getStatus() == ComplaintStatus.PENDING).count();
+        long inProgress = total - resolved - pending;
+
+        stats.put("total", total);
+        stats.put("resolved", resolved);
+        stats.put("pending", pending);
+        stats.put("inProgress", inProgress);
         return stats;
     }
 }

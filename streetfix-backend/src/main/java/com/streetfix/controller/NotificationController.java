@@ -5,10 +5,12 @@ import com.streetfix.dto.NotificationResponse;
 import com.streetfix.entity.Notification;
 import com.streetfix.repository.NotificationRepository;
 import com.streetfix.repository.UserRepository;
+import com.streetfix.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.Principal;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -36,7 +39,10 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<List<Notification>> getMyNotifications(Principal principal) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(getLoggedInUserId(principal)));
+        Long userId = getLoggedInUserId(principal);
+        List<Notification> notifications = notificationService.getUserNotifications(userId);
+        log.info("DEBUG_NOTIF: Notification fetched! User ID: {}, Count: {}", userId, notifications.size());
+        return ResponseEntity.ok(notifications);
     }
 
     @GetMapping("/unread-count")

@@ -25,9 +25,14 @@ public class HeatmapService {
     public List<HeatmapPointResponse> generateHeatmapData() {
         List<Complaint> activeComplaints = new ArrayList<>();
         activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.PENDING));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ACCEPTED));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.IN_PROGRESS));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_ZONAL_OFFICER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_ASSISTANT_COMMISSIONER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_WARD_SUPERVISOR));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_WORKER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.WORK_COMPLETED));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.VERIFIED_BY_WARD_SUPERVISOR));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.APPROVED_BY_ASSISTANT_COMMISSIONER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.APPROVED_BY_ZONAL_OFFICER));
 
         Map<String, HeatmapPointResponse> pointMap = new HashMap<>();
 

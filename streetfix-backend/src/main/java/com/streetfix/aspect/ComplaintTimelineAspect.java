@@ -73,8 +73,8 @@ public class ComplaintTimelineAspect {
                 String message = buildStatusMessage(newStatus);
                 timelineService.addTimelineEntry(id, newStatus, message, "SYSTEM");
 
-                // If complaint reaches RESOLVED or CLOSED, resolve the SLA
-                if (newStatus == ComplaintStatus.RESOLVED || newStatus == ComplaintStatus.CLOSED) {
+                // If complaint reaches RESOLVED, resolve the SLA
+                if (newStatus == ComplaintStatus.RESOLVED) {
                     slaService.resolveSla(id);
                 }
             } catch (Exception e) {
@@ -85,12 +85,15 @@ public class ComplaintTimelineAspect {
 
     private String buildStatusMessage(ComplaintStatus status) {
         return switch (status) {
-            case ASSIGNED             -> "Complaint assigned to officer for review";
-            case ACCEPTED             -> "Officer accepted and will begin work";
-            case IN_PROGRESS          -> "Field worker started working on the complaint";
-            case RESOLVED             -> "Work completed by field team. Awaiting citizen verification";
-            case CITIZEN_VERIFICATION -> "Sent to citizen for work verification";
-            case CLOSED               -> "Complaint closed after citizen verification and feedback";
+            case ASSIGNED_TO_ZONAL_OFFICER             -> "Complaint assigned to zonal officer";
+            case ASSIGNED_TO_ASSISTANT_COMMISSIONER    -> "Complaint assigned to assistant commissioner";
+            case ASSIGNED_TO_WARD_SUPERVISOR           -> "Complaint assigned to ward supervisor";
+            case ASSIGNED_TO_WORKER                    -> "Complaint assigned to field worker";
+            case WORK_COMPLETED                        -> "Work completed by field team. Awaiting verification";
+            case VERIFIED_BY_WARD_SUPERVISOR           -> "Verified by ward supervisor";
+            case APPROVED_BY_ASSISTANT_COMMISSIONER    -> "Approved by assistant commissioner";
+            case APPROVED_BY_ZONAL_OFFICER             -> "Approved by zonal officer";
+            case RESOLVED                              -> "Complaint resolved";
             default                   -> "Status updated to " + status.name();
         };
     }

@@ -4,6 +4,22 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './NotificationBell.css';
 
+const timeAgo = (dateStr) => {
+  if (!dateStr) return '';
+  const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " mins ago";
+  return Math.floor(seconds) + " seconds ago";
+};
+
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -14,6 +30,7 @@ const NotificationBell = () => {
   const fetchNotifications = async () => {
     try {
       const res = await api.get('/notifications');
+      console.log('Fetched notifications:', res.data);
       setNotifications(res.data);
       const unread = res.data.filter(n => !n.isRead).length;
       setUnreadCount(unread);
@@ -115,7 +132,7 @@ const NotificationBell = () => {
                 </div>
                 <span className="notification-message" style={{ whiteSpace: 'pre-wrap' }}>{notification.message}</span>
                 <span className="notification-time">
-                  {new Date(notification.createdAt).toLocaleString()}
+                  {timeAgo(notification.createdAt)}
                 </span>
               </li>
             ))}

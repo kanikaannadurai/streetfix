@@ -64,3 +64,13 @@
 .auth-footer span:hover {
   text-decoration: underline;
 }
+
+/* Responsive Overrides */
+@media (max-width: 576px) {
+  .auth-container {
+    padding: 12px;
+  }
+  .auth-box {
+    padding: 24px 20px;
+  }
+}

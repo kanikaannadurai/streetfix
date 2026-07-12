@@ -26,11 +26,11 @@ public class PublicServiceImpl implements PublicService {
         long total = allComplaints.size();
         
         long resolved = allComplaints.stream()
-                .filter(c -> c.getStatus() == ComplaintStatus.RESOLVED || c.getStatus() == ComplaintStatus.CLOSED || c.getStatus() == ComplaintStatus.CITIZEN_VERIFICATION)
+                .filter(c -> c.getStatus() == ComplaintStatus.RESOLVED || c.getStatus() == ComplaintStatus.APPROVED_BY_ZONAL_OFFICER || c.getStatus() == ComplaintStatus.APPROVED_BY_ASSISTANT_COMMISSIONER || c.getStatus() == ComplaintStatus.VERIFIED_BY_WARD_SUPERVISOR || c.getStatus() == ComplaintStatus.WORK_COMPLETED)
                 .count();
                 
         long pending = allComplaints.stream()
-                .filter(c -> c.getStatus() == ComplaintStatus.PENDING || c.getStatus() == ComplaintStatus.ASSIGNED || c.getStatus() == ComplaintStatus.ACCEPTED || c.getStatus() == ComplaintStatus.IN_PROGRESS)
+                .filter(c -> c.getStatus() == ComplaintStatus.PENDING || c.getStatus() == ComplaintStatus.ASSIGNED_TO_ZONAL_OFFICER || c.getStatus() == ComplaintStatus.ASSIGNED_TO_ASSISTANT_COMMISSIONER || c.getStatus() == ComplaintStatus.ASSIGNED_TO_WARD_SUPERVISOR || c.getStatus() == ComplaintStatus.ASSIGNED_TO_WORKER)
                 .count();
 
         Map<String, Long> categoryStats = allComplaints.stream()

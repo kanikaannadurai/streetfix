@@ -38,8 +38,7 @@ public class AnalyticsService {
     @Cacheable("analytics")
     public AnalyticsDashboardResponse getDashboardStats() {
         long totalComplaints = complaintRepository.count();
-        long resolvedComplaints = complaintRepository.findByStatus(ComplaintStatus.RESOLVED).size() +
-                                  complaintRepository.findByStatus(ComplaintStatus.CLOSED).size();
+        long resolvedComplaints = complaintRepository.findByStatus(ComplaintStatus.RESOLVED).size();
         long pendingComplaints = totalComplaints - resolvedComplaints;
         
         long breachedSlas = complaintSlaRepository.findByStatus(SlaStatus.BREACHED).size();
@@ -48,7 +47,7 @@ public class AnalyticsService {
         AtomicLong count = new AtomicLong(0);
         
         complaintRepository.findAll().stream()
-            .filter(c -> c.getStatus() == ComplaintStatus.RESOLVED || c.getStatus() == ComplaintStatus.CLOSED)
+            .filter(c -> c.getStatus() == ComplaintStatus.RESOLVED)
             .forEach(c -> {
                 if (c.getCreatedAt() != null && c.getUpdatedAt() != null) {
                     long hours = Duration.between(c.getCreatedAt(), c.getUpdatedAt()).toHours();

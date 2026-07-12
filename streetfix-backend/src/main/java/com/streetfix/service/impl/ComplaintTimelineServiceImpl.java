@@ -61,16 +61,14 @@ public class ComplaintTimelineServiceImpl implements ComplaintTimelineService {
                 .build();
     }
 
-    /** Convert enum to user-friendly display label */
     private String formatStatusLabel(ComplaintStatus status) {
         return switch (status) {
-            case PENDING             -> "Complaint Submitted";
-            case ASSIGNED            -> "Assigned to Officer";
-            case ACCEPTED            -> "Accepted by Officer";
-            case IN_PROGRESS         -> "Work In Progress";
-            case RESOLVED            -> "Work Completed";
-            case CITIZEN_VERIFICATION -> "Awaiting Citizen Verification";
-            case CLOSED              -> "Complaint Closed";
+            case PENDING -> "Complaint Submitted";
+            case ASSIGNED_TO_WARD_SUPERVISOR -> "Assigned to Ward Supervisor";
+            case ASSIGNED_TO_WORKER -> "Assigned to Worker";
+            case WORK_COMPLETED -> "Work Completed";
+            case VERIFIED_BY_WARD_SUPERVISOR -> "Verified by Ward Supervisor";
+            case RESOLVED -> "Resolved";
         };
     }
 }

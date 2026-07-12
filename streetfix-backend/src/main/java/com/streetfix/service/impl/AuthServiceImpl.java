@@ -21,13 +21,17 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final com.streetfix.repository.WorkerRepository workerRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+    public AuthServiceImpl(UserRepository userRepository, 
+                           com.streetfix.repository.WorkerRepository workerRepository,
+                           PasswordEncoder passwordEncoder,
                            AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
+        this.workerRepository = workerRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
@@ -55,7 +59,16 @@ public class AuthServiceImpl implements AuthService {
                 .address(registerRequest.getAddress())
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        if (role == Role.ROLE_WORKER) {
+            com.streetfix.entity.Worker worker = com.streetfix.entity.Worker.builder()
+                    .user(savedUser)
+                    .specialization("General")
+                    .build();
+            workerRepository.save(worker);
+        }
+
         return new MessageResponse("User registered successfully!");
     }
 
@@ -71,5 +84,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
 
         return new JwtResponse(jwt, userDetails.getId(), user.getName(), user.getEmail(), user.getRole().name());
+    }
+
+    @Override
+    public java.util.Optional<User> getCurrentUser(String email) {
+        return userRepository.findByEmail(email);
     }
 }

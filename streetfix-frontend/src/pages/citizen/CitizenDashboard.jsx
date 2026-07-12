@@ -25,15 +25,16 @@ const CitizenHome = () => {
         api.get('/dashboard/citizen').catch(() => ({ data: null })),
         api.get('/complaints/my').catch(() => ({ data: [] }))
       ]);
-      if (dashRes.data) setStats(dashRes.data);
+      const dashData = dashRes.data || {};
       const complaints = Array.isArray(compRes.data) ? compRes.data : [];
       setRecent(complaints.slice(0, 5));
-      if (!dashRes.data) {
-        const total  = complaints.length;
-        const resolved = complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length;
-        const pending  = complaints.filter(c => c.status === 'PENDING').length;
-        setStats({ total, resolved, pending, inProgress: total - resolved - pending });
-      }
+
+      const total  = dashData.total !== undefined ? dashData.total : (dashData.myComplaints !== undefined ? dashData.myComplaints : complaints.length);
+      const resolved = dashData.resolved !== undefined ? dashData.resolved : complaints.filter(c => c.status === 'RESOLVED' || c.status === 'CLOSED').length;
+      const pending  = dashData.pending !== undefined ? dashData.pending : complaints.filter(c => c.status === 'SUBMITTED' || c.status === 'PENDING').length;
+      const inProgress = dashData.inProgress !== undefined ? dashData.inProgress : (total - resolved - pending);
+      
+      setStats({ total, resolved, pending, inProgress });
     } catch (err) { console.error(err); }
   };
 
@@ -110,7 +111,9 @@ const CitizenHome = () => {
               >
                 <div className="complaint-card-header">
                   <span className="complaint-card-title">{c.title}</span>
-                  <span className={`status-badge status-${(c.status||'').toLowerCase()}`}>{c.status}</span>
+                  <span className={`status-badge status-${(c.status === 'SUBMITTED' ? 'PENDING' : c.status || '').toLowerCase()}`}>
+                    {c.status === 'SUBMITTED' ? 'PENDING' : c.status}
+                  </span>
                 </div>
                 <p className="complaint-card-desc">{c.description}</p>
                 <div className="complaint-card-meta">

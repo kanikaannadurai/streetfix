@@ -9,7 +9,8 @@ const Register = () => {
     email: '',
     password: '',
     phone: '',
-    address: ''
+    address: '',
+    role: 'CITIZEN'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,16 @@ const Register = () => {
           <div className="form-group">
             <label>Address (Optional)</label>
             <textarea name="address" className="input-field" value={formData.address} onChange={handleChange} rows="2" />
+          </div>
+          <div className="form-group">
+            <label>Account Role</label>
+            <select name="role" className="input-field" value={formData.role} onChange={handleChange}>
+              <option value="CITIZEN">Citizen</option>
+              <option value="OFFICER">Municipal Officer</option>
+              <option value="WARD_SUPERVISOR">Ward Supervisor</option>
+              <option value="WORKER">Worker</option>
+              <option value="ADMIN">Admin</option>
+            </select>
           </div>
           
           <button type="submit" className="btn-primary w-full" disabled={loading}>

@@ -8,8 +8,7 @@ import CitizenDashboard from './pages/citizen/CitizenDashboard';
 import OfficerDashboard from './pages/officer/OfficerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import WardSupervisorDashboard from './pages/supervisor/WardSupervisorDashboard';
-import CommissionerDashboard from './pages/commissioner/CommissionerDashboard';
-import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+import WorkerDashboard from './pages/worker/WorkerDashboard';
 import Navbar from './components/Navbar';
 import Profile from './pages/shared/Profile';
 import Settings from './pages/shared/Settings';
@@ -48,14 +47,21 @@ function App() {
 
           {/* Officer — nested routes handled inside OfficerDashboard */}
           <Route path="/officer/*" element={
-            <ProtectedRoute allowedRoles={['OFFICER', 'WORKER']}>
+            <ProtectedRoute allowedRoles={['OFFICER']}>
               <OfficerDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Worker — nested routes handled inside WorkerDashboard */}
+          <Route path="/worker/*" element={
+            <ProtectedRoute allowedRoles={['WORKER']}>
+              <WorkerDashboard />
             </ProtectedRoute>
           } />
 
           {/* Admin — nested routes handled inside AdminDashboard */}
           <Route path="/admin/*" element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN', 'MUNICIPAL_COMMISSIONER', 'WARD_SUPERVISOR', 'ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER']}>
+            <ProtectedRoute allowedRoles={['ADMIN', 'WARD_SUPERVISOR']}>
               <AdminDashboard />
             </ProtectedRoute>
           } />
@@ -64,20 +70,6 @@ function App() {
           <Route path="/ward-supervisor/*" element={
             <ProtectedRoute allowedRoles={['WARD_SUPERVISOR']}>
               <WardSupervisorDashboard />
-            </ProtectedRoute>
-          } />
-
-          {/* Commissioner (Asst. Commissioner, Zonal Officer, Municipal Commissioner) */}
-          <Route path="/commissioner/*" element={
-            <ProtectedRoute allowedRoles={['ASSISTANT_COMMISSIONER', 'ZONAL_OFFICER', 'MUNICIPAL_COMMISSIONER']}>
-              <CommissionerDashboard />
-            </ProtectedRoute>
-          } />
-
-          {/* Super Admin */}
-          <Route path="/super-admin/*" element={
-            <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
-              <SuperAdminDashboard />
             </ProtectedRoute>
           } />
 

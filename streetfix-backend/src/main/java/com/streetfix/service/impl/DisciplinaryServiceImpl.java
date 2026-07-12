@@ -48,11 +48,11 @@ public class DisciplinaryServiceImpl implements DisciplinaryService {
         } else if (totalViolations == 5) {
             officer.setStrikes((officer.getStrikes() != null ? officer.getStrikes() : 0) + 1);
             notificationService.sendNotification(officer.getUser().getId(), 
-                "CRITICAL STRIKE: SLA breach for complaint #" + complaint.getId() + ". Your profile is flagged for Assistant Commissioner review.");
+                "CRITICAL STRIKE: SLA breach for complaint #" + complaint.getId() + ". Your profile is flagged for Admin review.");
         } else {
             officer.setSuspensionRecommended(true);
             notificationService.sendNotification(officer.getUser().getId(), 
-                "SUSPENSION RECOMMENDED: Excessive SLA violations. An alert has been sent to the Municipal Commissioner.");
+                "SUSPENSION RECOMMENDED: Excessive SLA violations. An alert has been sent to the Admin.");
         }
 
         officerRepository.save(officer);

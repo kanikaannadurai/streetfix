@@ -1,13 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Shield, Building, Phone, MapPin } from 'lucide-react';
-import './Shared.css'; // Will create if needed, or inline styles
+import { User, Mail, Shield, Phone, MapPin, Loader } from 'lucide-react';
+import api from '../../services/api';
+import './Shared.css'; 
 
 const Profile = () => {
   const [profile, setProfile] = useState({
     name: localStorage.getItem('name') || 'User',
     role: (localStorage.getItem('role') || 'CITIZEN').replace('_', ' '),
     userId: localStorage.getItem('userId') || 'N/A',
+    email: '',
+    phone: '',
+    address: ''
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get('/auth/me');
+        setProfile({
+          name: res.data.name || localStorage.getItem('name') || 'User',
+          role: (res.data.role || localStorage.getItem('role') || 'CITIZEN').replace('_', ' '),
+          userId: res.data.id || localStorage.getItem('userId') || 'N/A',
+          email: res.data.email || 'Not provided',
+          phone: res.data.phone || 'Not provided',
+          address: res.data.address || 'Not provided'
+        });
+      } catch (err) {
+        console.error('Failed to fetch profile', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return <div className="dashboard-container" style={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}><Loader className="spin-icon" size={32} color="#60a5fa" /></div>;
+  }
 
   return (
     <div className="dashboard-container" style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '40px' }}>
@@ -25,11 +55,11 @@ const Profile = () => {
           color: '#fff',
           marginBottom: '16px'
         }}>
-          {profile.name[0].toUpperCase()}
+          {profile.name[0]?.toUpperCase()}
         </div>
         <h2 className="gradient-text">{profile.name}</h2>
         <span className={`status-badge status-${profile.role.toLowerCase().replace(' ', '-')}`} style={{ marginTop: '8px' }}>
-          {profile.role}
+          {profile.role.replace('ROLE', '')}
         </span>
       </div>
 
@@ -61,6 +91,37 @@ const Profile = () => {
               <div style={{ fontWeight: 600 }}>{profile.name}</div>
             </div>
           </div>
+
+          <div className="info-row" style={{ display: 'flex', padding: '12px', background: 'rgba(0,0,0,0.1)', borderRadius: '8px' }}>
+            <div style={{ width: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Mail size={20} color="#fbbf24" />
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Email Address</div>
+              <div style={{ fontWeight: 600 }}>{profile.email}</div>
+            </div>
+          </div>
+
+          <div className="info-row" style={{ display: 'flex', padding: '12px', background: 'rgba(0,0,0,0.1)', borderRadius: '8px' }}>
+            <div style={{ width: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Phone size={20} color="#f87171" />
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Phone Number</div>
+              <div style={{ fontWeight: 600 }}>{profile.phone}</div>
+            </div>
+          </div>
+
+          <div className="info-row" style={{ display: 'flex', padding: '12px', background: 'rgba(0,0,0,0.1)', borderRadius: '8px' }}>
+            <div style={{ width: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MapPin size={20} color="#60a5fa" />
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Address</div>
+              <div style={{ fontWeight: 600 }}>{profile.address}</div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

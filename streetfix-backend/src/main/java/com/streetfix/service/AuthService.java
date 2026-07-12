@@ -8,4 +8,5 @@ import com.streetfix.dto.RegisterRequest;
 public interface AuthService {
     MessageResponse registerUser(RegisterRequest registerRequest);
     JwtResponse authenticateUser(LoginRequest loginRequest);
+    java.util.Optional<com.streetfix.entity.User> getCurrentUser(String email);
 }

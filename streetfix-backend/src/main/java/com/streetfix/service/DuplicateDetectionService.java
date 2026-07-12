@@ -42,9 +42,10 @@ public class DuplicateDetectionService {
         // Only compare against active complaints
         List<Complaint> activeComplaints = new ArrayList<>();
         activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.PENDING));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ACCEPTED));
-        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.IN_PROGRESS));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_ZONAL_OFFICER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_ASSISTANT_COMMISSIONER));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_WARD_SUPERVISOR));
+        activeComplaints.addAll(complaintRepository.findByStatus(ComplaintStatus.ASSIGNED_TO_WORKER));
 
         for (Complaint existing : activeComplaints) {
             if (existing.getLatitude() == null || existing.getLongitude() == null) {

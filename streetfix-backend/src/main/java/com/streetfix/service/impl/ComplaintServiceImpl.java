@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class ComplaintServiceImpl implements ComplaintService {
 
     private final ComplaintRepository complaintRepository;
@@ -73,21 +76,23 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .citizen(citizen)
                 .build();
 
+        log.info("DEBUG_STATUS: Exact status value before saving: {}", complaint.getStatus());
         Complaint saved = complaintRepository.save(complaint);
+        
+        log.info("DEBUG_NOTIF: Complaint created successfully. ID: {}", saved.getId());
         
         if (saved.getPriority() == com.streetfix.enums.Priority.CRITICAL) {
             emergencyComplaintService.triggerEmergencyProtocol(saved);
+            notificationService.createNotificationForRole(Role.ROLE_ADMIN, saved.getId(), "CRITICAL: " + saved.getTitle() + " needs immediate attention", "A critical complaint has been submitted.");
+            notificationService.createNotificationForRole(Role.ROLE_WARD_SUPERVISOR, saved.getId(), "Critical complaint in your area", "Please prioritize this complaint.");
         }
 
-        String title = "New Complaint Reported";
+        String adminTitle = "New complaint received: " + saved.getTitle();
         String message = String.format("A new complaint has been submitted by a citizen and requires your attention.\nComplaint ID: %d\nTitle: %s\nCitizen: %s\nCategory: %s\nPriority: %s\nAddress: %s", 
                 saved.getId(), saved.getTitle(), citizen.getName(), saved.getCategory(), saved.getPriority(), saved.getAddress());
 
-        notificationService.createNotificationForRole(Role.ROLE_OFFICER, saved.getId(), title, message);
-        notificationService.createNotificationForRole(Role.ROLE_WARD_SUPERVISOR, saved.getId(), title, message);
-        notificationService.createNotificationForRole(Role.ROLE_ASSISTANT_COMMISSIONER, saved.getId(), title, message);
-        notificationService.createNotificationForRole(Role.ROLE_ZONAL_OFFICER, saved.getId(), title, message);
-        notificationService.createNotificationForRole(Role.ROLE_MUNICIPAL_COMMISSIONER, saved.getId(), title, message);
+        notificationService.createNotificationForRole(Role.ROLE_ADMIN, saved.getId(), adminTitle, message);
+        notificationService.createNotificationForUser(citizen.getId(), Role.ROLE_CITIZEN.name(), saved.getId(), "Your complaint has been submitted successfully", "Thank you for reporting to StreetFix.");
 
         return mapToResponse(saved);
     }
@@ -163,13 +168,14 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaint.setStatus(status);
         Complaint saved = complaintRepository.save(complaint);
 
-        if (status == ComplaintStatus.ACCEPTED) {
-            notificationService.createNotificationForRole(Role.ROLE_OFFICER, saved.getId(), "Worker Accepted Assignment", "The assigned worker has accepted the complaint.");
-        } else if (status == ComplaintStatus.COMPLETED) {
+        if (status == ComplaintStatus.ASSIGNED_TO_WORKER) {
+            notificationService.createNotificationForRole(Role.ROLE_OFFICER, saved.getId(), "Worker Assigned", "The assigned worker has been assigned.");
+        } else if (status == ComplaintStatus.RESOLVED) {
             notificationService.createNotificationForRole(Role.ROLE_OFFICER, saved.getId(), "Work Completed", "The worker has completed the assigned complaint. Please verify it.");
-        } else if (status == ComplaintStatus.CLOSED) {
-            notificationService.createNotificationForUser(saved.getCitizen().getId(), Role.ROLE_CITIZEN.name(), saved.getId(), "Complaint Closed", "Your complaint has been officially closed. Thank you for using StreetFix.");
         }
+        
+        notificationService.createNotificationForUser(saved.getCitizen().getId(), Role.ROLE_CITIZEN.name(), saved.getId(), "Your complaint status updated to " + status.name(), "Status changed.");
+        notificationService.createNotificationForRole(Role.ROLE_ADMIN, saved.getId(), "Complaint " + saved.getId() + " status changed to " + status.name(), "Status updated.");
 
         return mapToResponse(saved);
     }
@@ -187,10 +193,10 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaint.setCitizenRemarks(request.getRemarks());
 
         if (Boolean.TRUE.equals(request.getApproved())) {
-            complaint.setStatus(ComplaintStatus.CLOSED);
+            complaint.setStatus(ComplaintStatus.RESOLVED);
             notificationService.createNotificationForUser(citizen.getId(), Role.ROLE_CITIZEN.name(), complaint.getId(), "Complaint Resolved", "Your complaint has been successfully resolved.");
         } else {
-            complaint.setStatus(ComplaintStatus.IN_PROGRESS);
+            complaint.setStatus(ComplaintStatus.WORK_COMPLETED);
         }
 
         return mapToResponse(complaintRepository.save(complaint));

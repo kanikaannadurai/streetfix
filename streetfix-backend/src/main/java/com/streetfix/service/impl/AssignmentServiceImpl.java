@@ -49,12 +49,12 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         if (request.getOfficerId() != null) {
             officer = officerRepository.findById(request.getOfficerId()).orElse(null);
-            complaint.setStatus(ComplaintStatus.ASSIGNED);
+            complaint.setStatus(ComplaintStatus.ASSIGNED_TO_ZONAL_OFFICER);
         }
 
         if (request.getWorkerId() != null) {
             worker = workerRepository.findById(request.getWorkerId()).orElse(null);
-            complaint.setStatus(ComplaintStatus.ASSIGNED);
+            complaint.setStatus(ComplaintStatus.ASSIGNED_TO_WORKER);
         }
 
         Assignment assignment = Assignment.builder()
@@ -71,6 +71,12 @@ public class AssignmentServiceImpl implements AssignmentService {
             String message = String.format("A new complaint has been assigned to you. Please start the work.\nComplaint ID: %d\nTitle: %s\nLocation: %s\nPriority: %s",
                     complaint.getId(), complaint.getTitle(), complaint.getAddress(), complaint.getPriority());
             notificationService.createNotificationForUser(worker.getUser().getId(), Role.ROLE_WORKER.name(), complaint.getId(), title, message);
+        }
+        if (officer != null) {
+            String title = "New complaint assigned to you";
+            String message = String.format("A new complaint has been assigned to you for review.\nComplaint ID: %d\nTitle: %s\nLocation: %s\nPriority: %s",
+                    complaint.getId(), complaint.getTitle(), complaint.getAddress(), complaint.getPriority());
+            notificationService.createNotificationForUser(officer.getUser().getId(), officer.getUser().getRole().name(), complaint.getId(), title, message);
         }
 
         return new MessageResponse("Assignment created successfully");

@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
 
 @Service
 @Transactional
@@ -35,20 +36,38 @@ public class SlaServiceImpl implements SlaService {
     private final ComplaintRepository complaintRepository;
     private final AssignmentRepository assignmentRepository;
     private final DisciplinaryService disciplinaryService;
+    private final com.streetfix.service.NotificationService notificationService;
 
     public SlaServiceImpl(SlaConfigRepository slaConfigRepository,
                           ComplaintSlaRepository complaintSlaRepository,
                           ComplaintRepository complaintRepository,
                           AssignmentRepository assignmentRepository,
-                          DisciplinaryService disciplinaryService) {
+                          DisciplinaryService disciplinaryService,
+                          com.streetfix.service.NotificationService notificationService) {
         this.slaConfigRepository = slaConfigRepository;
         this.complaintSlaRepository = complaintSlaRepository;
         this.complaintRepository = complaintRepository;
         this.assignmentRepository = assignmentRepository;
         this.disciplinaryService = disciplinaryService;
+        this.notificationService = notificationService;
     }
 
     // ─────────────────────────── SLA CONFIG CRUD ───────────────────────────
+
+    @PostConstruct
+    public void initDefaultSlaConfigs() {
+        if (slaConfigRepository.count() == 0) {
+            List<String> categories = List.of("Pothole", "Garbage", "Water Leakage", "Street Light", "Drainage", "Sewage", "Other");
+            for (String category : categories) {
+                SlaConfig config = SlaConfig.builder()
+                        .category(category)
+                        .durationHours(DEFAULT_DURATION_HOURS)
+                        .warningHours(DEFAULT_WARNING_HOURS)
+                        .build();
+                slaConfigRepository.save(config);
+            }
+        }
+    }
 
     @Override
     public SlaConfigResponse createSlaConfig(SlaConfigRequest request) {
@@ -154,7 +173,12 @@ public class SlaServiceImpl implements SlaService {
             assignmentRepository.findByComplaintId(sla.getComplaint().getId()).stream()
                 .filter(assignment -> assignment.getOfficer() != null)
                 .findFirst()
-                .ifPresent(assignment -> disciplinaryService.applySlaViolationDiscipline(sla.getComplaint(), assignment.getOfficer()));
+                .ifPresent(assignment -> {
+                    disciplinaryService.applySlaViolationDiscipline(sla.getComplaint(), assignment.getOfficer());
+                    notificationService.createNotificationForUser(assignment.getOfficer().getUser().getId(), assignment.getOfficer().getUser().getRole().name(), sla.getComplaint().getId(), "Your complaint SLA has expired", "SLA breached.");
+                });
+                
+            notificationService.createNotificationForRole(com.streetfix.enums.Role.ROLE_ADMIN, sla.getComplaint().getId(), "SLA Breached for complaint: " + sla.getComplaint().getTitle(), "Immediate attention required.");
         }
 
         // 2. Mark warning SLAs (within 24-hour window, configurable per category)

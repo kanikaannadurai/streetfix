@@ -180,7 +180,9 @@ const MyComplaints = () => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
-                      <span className={`status-badge status-${(c.status || '').toLowerCase()}`}>{(c.status || '').replace('_', ' ')}</span>
+                      <span className={`status-badge status-${(c.status === 'SUBMITTED' ? 'PENDING' : c.status || '').toLowerCase()}`}>
+                        {(c.status === 'SUBMITTED' ? 'PENDING' : c.status || '').replace('_', ' ')}
+                      </span>
                       {c.latitude && c.longitude && (
                         <button 
                           className="btn-secondary" 

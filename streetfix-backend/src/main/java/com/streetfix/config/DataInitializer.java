@@ -27,11 +27,7 @@ public class DataInitializer implements CommandLineRunner {
         String encodedPassword = passwordEncoder.encode(defaultPassword);
 
         List<UserData> defaultUsers = Arrays.asList(
-                new UserData(Role.ROLE_SUPER_ADMIN, "Super Admin", "superadmin@streetfix.com"),
                 new UserData(Role.ROLE_ADMIN, "Admin", "admin@streetfix.com"),
-                new UserData(Role.ROLE_MUNICIPAL_COMMISSIONER, "Municipal Commissioner", "commissioner@streetfix.com"),
-                new UserData(Role.ROLE_ZONAL_OFFICER, "Zonal Officer", "zonal@streetfix.com"),
-                new UserData(Role.ROLE_ASSISTANT_COMMISSIONER, "Assistant Commissioner", "assistant@streetfix.com"),
                 new UserData(Role.ROLE_WARD_SUPERVISOR, "Ward Supervisor", "ward@streetfix.com"),
                 new UserData(Role.ROLE_OFFICER, "Officer", "officer@streetfix.com"),
                 new UserData(Role.ROLE_WORKER, "Worker", "worker@streetfix.com")

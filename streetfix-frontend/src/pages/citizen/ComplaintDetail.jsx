@@ -102,8 +102,8 @@ const ComplaintDetail = () => {
             <p>{complaint.title}</p>
           </div>
         </div>
-        <span className={`status-badge status-${(complaint.status || '').toLowerCase()}`} style={{ fontSize: '13px', padding: '6px 14px' }}>
-          {(complaint.status || '').replace('_', ' ')}
+        <span className={`status-badge status-${(complaint.status === 'SUBMITTED' ? 'PENDING' : complaint.status || '').toLowerCase()}`} style={{ fontSize: '13px', padding: '6px 14px' }}>
+          {(complaint.status === 'SUBMITTED' ? 'PENDING' : complaint.status || '').replace('_', ' ')}
         </span>
       </div>
 
@@ -257,7 +257,7 @@ const ComplaintDetail = () => {
                   {i < timeline.length - 1 && <div className="timeline-line" />}
                 </div>
                 <div className="timeline-content">
-                  <div className="timeline-status">{(t.status || '').replace('_', ' ')}</div>
+                  <div className="timeline-status">{(t.status === 'SUBMITTED' ? 'PENDING' : t.status || '').replace('_', ' ')}</div>
                   {t.note && <div className="timeline-note">{t.note}</div>}
                   <div className="timeline-date">{fmt(t.date || t.createdAt || t.timestamp)}</div>
                 </div>

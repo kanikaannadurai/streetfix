@@ -1,13 +1,19 @@
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 12px 28px;
   margin: 12px 16px;
   position: sticky;
   top: 12px;
   z-index: 1000;
-  gap: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .navbar-brand {
@@ -19,6 +25,26 @@
   flex-shrink: 0;
 }
 .navbar-brand:hover { opacity: 0.8; }
+
+.navbar-mobile-actions {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-menu-btn {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.navbar-collapse {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
 
 /* Nav Links */
 .navbar-links {
@@ -67,17 +93,71 @@
   gap: 10px;
   color: var(--text-light);
 }
+.nav-user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
 
 .logout-btn {
   padding: 8px 14px;
   font-size: 13px;
 }
 
-.nav-icon {
-  width: 18px;
-  height: 18px;
+/* Responsive Overrides */
+@media (max-width: 900px) {
+  .navbar {
+    flex-direction: column;
+    padding: 12px;
+  }
+  .navbar-mobile-actions {
+    display: flex;
+  }
+  .navbar-collapse {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 16px;
+    gap: 12px;
+  }
+  .navbar-collapse.show {
+    display: flex;
+  }
+  .navbar-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  .nav-link-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+  }
+  .navbar-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 16px;
+    align-items: flex-start;
+  }
+  .desktop-only-bell {
+    display: none;
+  }
+  .nav-user {
+    width: 100%;
+  }
+  .logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-@media (max-width: 900px) {
-  .navbar-links { display: none; }
+@media (max-width: 576px) {
+  .navbar {
+    margin: 8px;
+  }
+  .nav-user-text {
+    display: none;
+  }
 }
